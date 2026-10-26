@@ -32,7 +32,7 @@ function renderCalendar() {
     <div class="calendar-layout"><section class="surface calendar-month" aria-label="${esc(title)}"><div class="calendar-week">${tr('Пн Вт Ср Чт Пт Сб Вс','Mon Tue Wed Thu Fri Sat Sun').split(' ').map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells}</div></section>
     <section class="surface calendar-agenda"><h2>${esc(new Date(calendarDay+'T12:00:00').toLocaleDateString(calendarLocale(),{day:'numeric',month:'long',year:'numeric'}))}</h2>${daily.length?daily.map(item=>{
       const person=shootPerson(item.personId);
-      return `<article class="shoot-entry"><span class="shoot-time">${esc(item.time)}${item.end?' — '+esc(item.end):''}</span><h3 data-user-content>${esc(item.title)}</h3>${person?`<p data-user-content>${esc(person.name)} · ${esc(person.city)}</p>`:''}${item.location?`<p data-user-content>⌖ ${esc(item.location)}</p>`:''}${item.notes?`<p class="shoot-notes" data-user-content>${esc(item.notes)}</p>`:''}<div class="shoot-actions"><button data-edit-shoot="${esc(item.id)}">${tr('Редактировать','Edit')}</button>${person?`<button data-shoot-chat="${person.id}">${tr('Открыть чат','Open chat')} ↗</button>`:''}</div></article>`;
+      return `<article class="shoot-entry"><span class="shoot-time">${esc(item.time)}${item.end?' — '+esc(item.end):''}</span><h3 data-user-content>${esc(item.title)}</h3>${person?`<p data-user-content>${esc(person.name)} · ${esc(person.city)}</p>`:''}${item.location?`<p data-user-content>⌖ ${esc(item.location)}</p>`:''}${item.notes?`<p class="shoot-notes" data-user-content>${esc(item.notes)}</p>`:''}<div class="shoot-actions">${item.id.startsWith('agreement-')?`<button data-plan-board="${esc(item.id)}">${tr('Мудборд и подготовка','Moodboard and preparation')}</button><button data-plan-cancel="${esc(item.id)}">${tr('Отменить съёмку','Cancel shoot')}</button>`:''}<button data-edit-shoot="${esc(item.id)}">${tr('Редактировать','Edit')}</button>${person?`<button data-shoot-chat="${person.id}">${tr('Открыть чат','Open chat')} ↗</button>`:''}</div></article>`;
     }).join(''):`<div class="calendar-empty"><span aria-hidden="true">＋</span><p>${tr('На этот день съёмок пока нет.','No shoots planned for this day.')}</p><button id="calendar-empty-add">${tr('Запланировать съёмку','Plan a shoot')}</button></div>`}</section></div>
     <p class="demo-banner">${tr('Личный календарь на этом устройстве. Время указывай по месту съёмки. Запись не отправляет приглашение собеседнику.','Your personal calendar on this device. Use local time at the shoot location. Saving does not send an invitation.')}</p>`;
   const content=document.getElementById('content');
@@ -43,12 +43,15 @@ function renderCalendar() {
   document.getElementById('calendar-today').onclick=()=>{calendarDay=shootDateKey();calendarMonth=calendarDay.slice(0,7);renderCalendar();};
   document.getElementById('calendar-add').onclick=()=>openShootEditor();
   document.getElementById('calendar-empty-add')?.addEventListener('click',()=>openShootEditor());
+  content.querySelectorAll('[data-plan-board]').forEach(button=>button.onclick=()=>{const item=savedShoots().find(s=>s.id===button.dataset.planBoard);if(item)openPlanning(item.personId,item.id.slice(10));});
+  content.querySelectorAll('[data-plan-cancel]').forEach(button=>button.onclick=()=>{const item=savedShoots().find(s=>s.id===button.dataset.planCancel);if(item)cancelProposal(item.personId,item.id.slice(10));});
   content.querySelectorAll('[data-edit-shoot]').forEach(button=>button.onclick=()=>openShootEditor(button.dataset.editShoot));
   content.querySelectorAll('[data-shoot-chat]').forEach(button=>button.onclick=()=>{state.chat=Number(button.dataset.shootChat);selectTab('messages');});
 }
 
 function openShootEditor(id=null,personId=null) {
   const existing=id?savedShoots().find(item=>item.id===id):null;
+  if(existing?.id.startsWith('agreement-') && proposalById(existing.personId,existing.id.slice(10))) { editProposal(existing.personId,existing.id.slice(10)); return; }
   if(id&&!existing)return;
   const selectedPerson=existing?.personId??personId;
   const person=shootPerson(selectedPerson);

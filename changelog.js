@@ -5,6 +5,59 @@
 // а не отдельные коммиты и промежуточные изменения. Даты — YYYY-MM-DD.
 // Тексты в каждой паре: [русский, английский].
 const releaseNotes = [
+{
+  "date": "2026-10-26",
+  "title": [
+    "Команда и подготовка к съёмке",
+    "Team and shoot preparation"
+  ],
+  "changes": [
+    {
+      "title": [
+        "Фильтры и отклики",
+        "Filters and responses"
+      ],
+      "text": [
+        "Добавлены фильтры по городу, роли, дате и оплате, режим «Мои отклики», статусы приглашения и отказа, переходы в профиль и чат кандидата. Закрытые и прошедшие объявления скрыты по умолчанию. Для знакомства с разделом можно добавить примеры.",
+        "Filter by city, role, date and payment. My responses shows invitation and decline statuses; candidate profiles and chats are linked. Closed and past announcements are hidden by default. Optional examples help explore the section."
+      ]
+    },
+    {
+      "title": [
+        "Перенос и отмена",
+        "Rescheduling and cancellation"
+      ],
+      "text": [
+        "Условия и участников можно изменить после обсуждения; связанная запись календаря обновляется. При отмене требуется причина, съёмка удаляется из календаря, а её история остаётся в чате.",
+        "Edit details and participants after discussing them; the linked calendar entry updates. Cancellation requires a reason, removes the calendar entry and keeps the history in chat."
+      ]
+    },
+    {
+      "title": [
+        "Мудборд и подготовка",
+        "Moodboard and preparation"
+      ],
+      "text": [
+        "В карточках съёмок и календаре доступны референсы: изображения и ссылки. Добавляй задачи, назначай ответственных и отмечай готовность.",
+        "Shoot cards and linked calendar entries now include image and link references. Add tasks, assign owners and mark them complete."
+      ]
+    },
+    {
+      "title": [
+        "Напоминания",
+        "Reminders"
+      ],
+      "text": [
+        "В шапке появился раздел с напоминаниями о съёмках в ближайшие 24 часа и предложениях без договорённости дольше суток. Напоминания можно скрыть и восстановить.",
+        "The header now links to reminders for shoots within 24 hours and proposals awaiting agreement for over a day. Dismiss and restore reminders as needed."
+      ]
+    }
+  ],
+  "note": [
+    "Локальная демонстрация. Данные не отправляются другим людям. Напоминания работают внутри открытого сайта, без фоновых уведомлений.",
+    "Local demo. Data is not sent to other people. Reminders work inside the open site, without background notifications."
+  ]
+},
   {
     date: "2026-10-26",
     title: ["От знакомства к съёмке", "From a connection to a shoot"],

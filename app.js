@@ -268,6 +268,7 @@ function render() {
   if (state.tab === "profile") { renderProfilePage(); return; }
   if (state.tab === "portfolio") { renderPortfolio(); return; }
   if (state.tab === "settings") { renderSettings(); return; }
+  if (state.tab === "reminders") { renderReminders(); return; }
   if (state.tab === "casting") { renderCasting(); return; }
   if (state.tab === "calendar") { renderCalendar(); return; }
 
@@ -1113,8 +1114,8 @@ if (!["light","dark"].includes(settings.theme)) settings.theme = "light";
 if (!["ru","en"].includes(settings.language)) settings.language = "ru";
 
 const tr = (ru,en) => settings.language === "en" ? en : ru;
-const routes = ["casting","calendar","home","search","messages","profile","portfolio","saved","likes","settings"];
-const labels = () => ({casting:tr("Поиск команды","Find a team"),calendar:tr("Календарь съёмок","Shoot calendar"),user:tr("Профиль пользователя","User profile"),home:tr("Главная","Home"),search:tr("Найти своих","Find your people"),messages:tr("Чаты","Chats"),profile:tr("Профиль","Profile"),portfolio:tr("Портфолио","Portfolio"),saved:tr("Избранное","Saved"),likes:tr("Симпатии","Likes"),settings:tr("Настройки","Settings")});
+const routes = ["reminders","casting","calendar","home","search","messages","profile","portfolio","saved","likes","settings"];
+const labels = () => ({reminders:tr("Напоминания","Reminders"),casting:tr("Поиск команды","Find a team"),calendar:tr("Календарь съёмок","Shoot calendar"),user:tr("Профиль пользователя","User profile"),home:tr("Главная","Home"),search:tr("Найти своих","Find your people"),messages:tr("Чаты","Chats"),profile:tr("Профиль","Profile"),portfolio:tr("Портфолио","Portfolio"),saved:tr("Избранное","Saved"),likes:tr("Симпатии","Likes"),settings:tr("Настройки","Settings")});
 function applySettings() {
   document.documentElement.dataset.theme = settings.theme;
   document.documentElement.lang = settings.language;
@@ -1124,6 +1125,7 @@ function pageIntro(title,description,back=false) {
   return `<section class="intro">${back ? `<a class="back-link" href="#profile">← ${tr("Профиль","Profile")}</a>` : `<span class="eyebrow">ВКАДРЕ / ${tr("ТВОРЧЕСКОЕ СООБЩЕСТВО","CREATIVE COMMUNITY")}</span>`}<h1>${title}<em>.</em></h1><p>${description}</p></section>`;
 }
 function renderShell() {
+  updateReminderBadge();
   const names = labels();
   const active = ["portfolio","saved","likes"].includes(state.tab) ? "profile" : state.tab;
   document.querySelector("nav").innerHTML = [["search","⌕"],["casting","＋"],["messages",'<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M20 11.5a8 8 0 0 1-8 8 9 9 0 0 1-3.5-.7L4 20l1.2-4.5A9 9 0 0 1 4.5 12a8 8 0 0 1 8-8H13a7 7 0 0 1 7 7z"/><path d="M8 10h8M8 14h5"/></svg>'],["calendar",'<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M8 15h3M14 15h2"/></svg>']].map(([id,icon]) => `<a href="#${id}" class="${active === id ? "active" : ""}" ${active === id ? 'aria-current="page"' : ""}><span class="nav-message-icon" aria-hidden="true">${icon}${id==="messages"&&hasAnyUnread()?'<i class="nav-unread-dot"></i>':""}</span>${names[id]}${id==="messages"&&hasAnyUnread()?`<span class="sr-only">${tr("Есть непрочитанные сообщения","Unread messages")}</span>`:""}</a>`).join("");
@@ -1571,3 +1573,5 @@ applySettings();
 state.tab = location.hash.startsWith('#user/') ? 'user' : routes.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home';
 render();
 loadPortfolio();
+
+setInterval(()=>{updateReminderBadge();if(state.tab==="reminders"&&!document.querySelector(".overlay"))renderReminders();},60000);

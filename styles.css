@@ -299,3 +299,35 @@ nav a .nav-message-icon{position:relative;display:inline-flex;align-items:center
 .release-entry li{padding-left:4px;margin-bottom:18px;line-height:1.6}
 .release-entry li p{margin:5px 0 0}
 .release-entry .release-note{border-left:2px solid var(--line);padding-left:14px;font-size:12px;color:var(--muted);line-height:1.6}
+
+/* Recruitment, shoot preparation and reminders */
+.casting-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:end}
+.casting-filters .form-label{margin:0}.casting-filters input,.casting-filters select{width:100%;min-width:0}
+.casting-filters>button{padding:12px;border:1px solid var(--line);border-radius:8px}
+.casting-response{padding:16px 0;border-top:1px solid var(--line)}
+.casting-response>div:first-child{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.planning-status{display:inline-block;font-size:11px;color:var(--muted);line-height:1.6}
+.casting-response .planning-status{padding:4px 8px;border-radius:6px;background:var(--soft,#eee)}
+.workflow-actions a{align-self:center;text-underline-offset:4px;font-size:12px}
+.workflow-actions button:disabled{opacity:.45;cursor:default}
+.agreement-card.is-cancelled{border-style:dashed}
+.agreement-card details{font-size:12px}.agreement-card summary{cursor:pointer}
+.modal.wide.planning-modal{display:block;width:780px;max-width:calc(100vw - 32px);max-height:90dvh;overflow-y:auto;padding:30px}
+.planning-modal h2{padding-right:25px}.planning-modal h3{margin-top:28px}
+.planning-modal>p{font-size:13px;line-height:1.6;color:var(--muted)}
+.moodboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.reference-card{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.reference-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.reference-link-icon{display:grid;place-items:center;aspect-ratio:4/3;background:var(--soft,#eee);font-size:32px}
+.reference-card figcaption{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;font-size:12px;overflow-wrap:anywhere}
+.reference-card figcaption button{padding:4px 8px;font-size:20px}
+.planning-inline-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);align-items:end}
+.planning-inline-form .form-label{margin:0}.planning-inline-form input{width:100%;min-width:0}.planning-inline-form input[type=file]{font-size:11px}
+.preparation-list{list-style:none;padding:0}.preparation-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.preparation-list label{display:flex;align-items:center;gap:12px;overflow-wrap:anywhere}.preparation-list input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--ink)}
+.preparation-list small{display:block;color:var(--muted);margin-top:4px;font-size:11px}.preparation-list button{padding:6px 10px;font-size:20px}.task-done{text-decoration:line-through;color:var(--muted)}
+.reminders-link{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;height:34px;color:var(--ink);border-radius:8px}
+.reminders-link:hover{background:var(--soft,#eee)}.reminder-count{position:absolute;right:-5px;top:-4px;background:var(--ink);color:var(--bg,#fff);font-size:9px;min-width:15px;height:15px;padding:1px 3px;border-radius:10px;text-align:center}
+.reminder-list{display:grid;gap:16px;margin:20px 0}.reminder-list h2{font-size:20px}
+@media(max-width:650px){.casting-filters{grid-template-columns:1fr 1fr}.moodboard-grid{grid-template-columns:1fr 1fr}.modal.wide.planning-modal{padding:22px}.planning-inline-form{grid-template-columns:1fr}.header-actions{gap:5px}header>.header-actions{max-width:none}.reminders-link{flex-basis:28px}}
+.casting-filters select{min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface,#fff);color:var(--ink);font:inherit}
