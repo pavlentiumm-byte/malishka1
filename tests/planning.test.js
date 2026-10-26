@@ -64,8 +64,8 @@ function runPlanningTests() {
   shoots=[{id:'agreement-p2',title:'Upcoming',date:'2026-11-12',time:'12:00'}, {id:'past',date:'2026-11-12',time:'09:00'},{id:'later',date:'2026-11-20',time:'12:00'}];
   state.messages={2:[{proposal:{...proposal,id:'p2'},createdAt:now-172800000},{proposal:{...proposal,id:'pending',status:'proposed'},createdAt:now-90000000},{proposal:{...proposal,id:'cancelled',status:'cancelled'},createdAt:now-90000000}]};
   const reminders=collectReminders(now);
-  assert(reminders.length===2,'reminders exclude past, distant, cancelled and duplicates');
-  assert(reminders.some(r=>r.id==='proposal:pending'),'pending proposal reminder');
+  assert(reminders.length===1,'reminders exclude past, distant, cancelled, retired proposals and duplicates');
+  assert(!reminders.some(r=>r.id==='proposal:pending'),'retired proposals do not generate reminders');
   assert(reminders.some(r=>r.kind==='calendar'),'upcoming shoot reminder');
   workflowSave('castings',[{id:'job',responses:[{id:'r1',status:'pending',personId:0}]}]);
   assert(updateCasting('job',p=>({...p,responses:p.responses.map(r=>({...r,status:'invited'}))})),'invite saves');

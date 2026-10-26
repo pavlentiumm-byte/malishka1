@@ -331,3 +331,13 @@ nav a .nav-message-icon{position:relative;display:inline-flex;align-items:center
 .reminder-list{display:grid;gap:16px;margin:20px 0}.reminder-list h2{font-size:20px}
 @media(max-width:650px){.casting-filters{grid-template-columns:1fr 1fr}.moodboard-grid{grid-template-columns:1fr 1fr}.modal.wide.planning-modal{padding:22px}.planning-inline-form{grid-template-columns:1fr}.header-actions{gap:5px}header>.header-actions{max-width:none}.reminders-link{flex-basis:28px}}
 .casting-filters select{min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface,#fff);color:var(--ink);font:inherit}
+
+.registration-options{margin:20px 0 24px}.registration-options h3{margin:0 0 8px;font-size:17px}.registration-options .registration-intro{font-size:13px;line-height:1.5;margin:0 0 16px;color:var(--muted)}
+.sign-in-providers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.provider-button{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff);text-align:left;min-height:52px;flex-wrap:wrap}
+.provider-button:hover{background:var(--soft,#eee)}.provider-button small{font-size:10px;color:var(--muted);margin-left:auto}
+.provider-mark{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 26px;font-size:19px;font-weight:700;border-radius:7px;background:var(--soft,#eee);color:var(--ink)}.provider-mark-vk{font-size:12px}.provider-mark-telegram{font-size:24px}
+.registration-options .registration-hint{font-size:12px;line-height:1.6;color:var(--muted);margin:14px 0}
+.provider-status{font-size:12px;line-height:1.6;border-left:2px solid var(--ink);padding:8px 12px;background:var(--soft,#eee)}.provider-status[hidden]{display:none}
+.registration-divider{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:11px;color:var(--muted)}.registration-divider:before,.registration-divider:after{content:"";height:1px;background:var(--line);flex:1}
+@media(max-width:420px){.sign-in-providers{grid-template-columns:1fr}.provider-button{padding:10px 12px}}

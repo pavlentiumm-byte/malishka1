@@ -6,6 +6,74 @@
 // Тексты в каждой паре: [русский, английский].
 const releaseNotes = [
 {
+  "date": "2026-10-27",
+  "title": [
+    "Спокойнее интерфейс, проще навигация",
+    "Calmer controls, simpler navigation"
+  ],
+  "changes": [
+    {
+      "title": [
+        "Единый стиль управления",
+        "Consistent controls"
+      ],
+      "text": [
+        "Обновлены кнопки, поля, переключатели и выбор файлов. Уточнены отступы, размеры, состояния фокуса и расположение действий в формах.",
+        "Refined buttons, fields, switches and file selection, with consistent spacing, sizing, focus states and form actions."
+      ]
+    },
+    {
+      "title": [
+        "Личные инструменты в профиле",
+        "Personal tools in your profile"
+      ],
+      "text": [
+        "Календарь перенесён из главного меню в профиль. Создание предложений съёмок убрано из профилей и чатов; ранее сохранённые записи доступны.",
+        "The calendar moved from main navigation into the profile. Creating shoot proposals was removed from profiles and chats; existing records remain accessible."
+      ]
+    },
+    {
+      "title": [
+        "Концепция ВКадре Pro",
+        "ВКадре Pro concept"
+      ],
+      "text": [
+        "В профиле и настройках можно посмотреть идею подписки: расширенное портфолио, статистику, шаблоны объявлений и подборки участников. Базовое общение остаётся бесплатным. Цены, оплата и платные ограничения не включены.",
+        "Explore a subscription concept from your profile and settings: expanded portfolios, insights, announcement templates and talent collections. Core communication stays free. Pricing, payments and paid limits are not enabled."
+      ]
+    },
+    {
+      "title": [
+        "Компьютер и телефон",
+        "Desktop and mobile"
+      ],
+      "text": [
+        "Обновлены мобильное меню, шапка, модальные окна и сетки форм. Увеличены зоны нажатия и убраны длинные надписи из компактных элементов.",
+        "Updated mobile navigation, header, dialogs and form grids. Increased touch targets and shortened labels in compact controls."
+      ]
+    }
+  ]
+},
+{
+  "date": "2026-10-27",
+  "title": [
+    "Варианты входа при регистрации",
+    "Sign-in options at registration"
+  ],
+  "changes": [
+    {
+      "title": [
+        "Google, Яндекс, Telegram и VK",
+        "Google, Yandex, Telegram and VK"
+      ],
+      "text": [
+        "В форме нового профиля появились четыре варианта входа. Каждый помечен как неподключённый: локальная демонстрация не авторизует через сервисы и не создаёт аккаунты. Заполнение локального профиля по-прежнему доступно.",
+        "New profile registration now shows four sign-in options. Each is marked as not connected: the local demo does not authenticate with providers or create accounts. Local profile creation remains available."
+      ]
+    }
+  ]
+},
+{
   "date": "2026-10-26",
   "title": [
     "Команда и подготовка к съёмке",

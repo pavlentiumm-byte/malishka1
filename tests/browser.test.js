@@ -13,8 +13,8 @@ fill(document.querySelector('#workflow-form'),{name:'Тестовый участ
 assert(document.querySelector('.casting-card').textContent.includes('На рассмотрении'),'response visible');
 document.querySelector('[data-response-status="invited"]').click();
 assert(document.querySelector('.casting-card').textContent.includes('Приглашён в команду'),'invite status visible');
-openProposal(2);
-fill(document.querySelector('#workflow-form'),{title:'Портретная история',date:offsetDay(1),time:'12:00',location:'Студия',terms:'TFP, фотографии через неделю'});await wait();
+// Legacy records stay readable after removing proposal creation from the UI.
+sendWorkflowMessage(2,{id:'legacy-test',title:'Портретная история',date:offsetDay(1),time:'12:00',location:'Студия',terms:'TFP',format:'TFP',participants:'Михаил, Анна',status:'proposed'},'Архивная запись');state.chat=2;selectTab('messages');await wait();
 assert(document.querySelector('.agreement-card'),'proposal renders in chat');
 document.querySelector('[data-agree]').click();fill(document.querySelector('#workflow-form'),{participants:'Михаил, Анна'});
 document.querySelector('[data-agreement-calendar]').click();await wait();
