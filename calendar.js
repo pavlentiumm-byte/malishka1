@@ -8,10 +8,12 @@ let calendarDay = shootDateKey();
 let calendarMonth = calendarDay.slice(0,7);
 function savedShoots() {
   const value = read('shoots',[]);
-  return Array.isArray(value) ? value.filter(item => item && typeof item.id==='string' && /^\d{4}-\d{2}-\d{2}$/.test(item.date) && typeof item.time==='string') : [];
+  const manual=Array.isArray(value) ? value.filter(item => item && typeof item.id==='string' && /^\d{4}-\d{2}-\d{2}$/.test(item.date) && typeof item.time==='string') : [];
+  const derived=projectCalendarEvents();
+  return [...manual.filter(item=>!derived.some(project=>project.id===item.id)),...derived];
 }
 function saveShoots(items) {
-  try { localStorage.setItem('kadr-html-shoots',JSON.stringify(items)); return true; }
+  try { localStorage.setItem('kadr-html-shoots',JSON.stringify(items.filter(item=>!item.projectId))); return true; }
   catch { return false; }
 }
 function shootPerson(id) { return people.find(person=>person.id===Number(id)); }
@@ -19,23 +21,26 @@ function calendarLocale() { return settings.language==='en' ? 'en-GB' : 'ru-RU';
 function renderCalendar() {
   const [year,month]=calendarMonth.split('-').map(Number);
   const first=new Date(year,month-1,1,12), count=new Date(year,month,0,12).getDate();
-  const offset=(first.getDay()+6)%7, today=shootDateKey(), shoots=savedShoots();
+  const offset=(first.getDay()+6)%7, today=shootDateKey(), shoots=savedShoots(),availability=ownAvailabilityDays();
   const daily=shoots.filter(item=>item.date===calendarDay).sort((a,b)=>a.time.localeCompare(b.time));
   const title=first.toLocaleDateString(calendarLocale(),{month:'long',year:'numeric'});
   let cells=Array.from({length:offset},()=>'<span class="calendar-blank" aria-hidden="true"></span>').join('');
   for(let day=1;day<=count;day++) {
     const date=`${calendarMonth}-${String(day).padStart(2,'0')}`, total=shoots.filter(item=>item.date===date).length;
-    cells+=`<button class="calendar-day ${date===today?'is-today':''} ${date===calendarDay?'is-selected':''}" data-day="${date}" aria-pressed="${date===calendarDay}" aria-label="${date}, ${tr('съёмок','shoots')}: ${total}"><span>${day}</span>${total?`<small>${total}<span class="calendar-count-label"> ${tr('съёмки','shoots')}</span></small>`:''}</button>`;
+    cells+=`<button class="calendar-day ${date===today?'is-today':''} ${date===calendarDay?'is-selected':''}" data-day="${date}" aria-pressed="${date===calendarDay}" aria-label="${date}, ${tr('съёмок','shoots')}: ${total}, ${availabilityLabel(availability[date])}"><span>${day}</span>${availability[date]?`<i class="availability-dot availability-${availability[date]}" title="${availabilityLabel(availability[date])}"></i>`:''}${total?`<small>${total}<span class="calendar-count-label"> ${tr('съёмки','shoots')}</span></small>`:''}</button>`;
   }
   document.getElementById('content').innerHTML=pageIntro(tr('Календарь съёмок','Shoot calendar'),tr('Твои даты, места и детали встреч — в одном месте.','Your dates, locations and meeting details in one place.'),true)+`
     <div class="calendar-toolbar"><div class="calendar-month-nav"><button id="calendar-prev" aria-label="${tr('Предыдущий месяц','Previous month')}">←</button><h2>${esc(title)}</h2><button id="calendar-next" aria-label="${tr('Следующий месяц','Next month')}">→</button></div><div class="calendar-actions"><button id="calendar-today">${tr('Сегодня','Today')}</button><button id="calendar-add" class="primary">＋ ${tr('Добавить съёмку','Add shoot')}</button></div></div>
-    <div class="calendar-layout"><section class="surface calendar-month" aria-label="${esc(title)}"><div class="calendar-week">${tr('Пн Вт Ср Чт Пт Сб Вс','Mon Tue Wed Thu Fri Sat Sun').split(' ').map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells}</div></section>
-    <section class="surface calendar-agenda"><h2>${esc(new Date(calendarDay+'T12:00:00').toLocaleDateString(calendarLocale(),{day:'numeric',month:'long',year:'numeric'}))}</h2>${daily.length?daily.map(item=>{
+    <div class="availability-legend">${['free','busy','tentative','confirmed'].map(s=>`<span><i class="availability-dot availability-${s}"></i>${availabilityLabel(s)}</span>`).join('')}</div><div class="calendar-layout"><section class="surface calendar-month" aria-label="${esc(title)}"><div class="calendar-week">${tr('Пн Вт Ср Чт Пт Сб Вс','Mon Tue Wed Thu Fri Sat Sun').split(' ').map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells}</div></section>
+    <section class="surface calendar-agenda"><h2>${esc(new Date(calendarDay+'T12:00:00').toLocaleDateString(calendarLocale(),{day:'numeric',month:'long',year:'numeric'}))}</h2><p>${availabilityLabel(availability[calendarDay])}</p><div class="workflow-actions"><button id="calendar-availability">${tr('Изменить доступность','Edit availability')}</button><button id="availability-visibility">${tr('Видимость','Visibility')}</button></div>${daily.length?daily.map(item=>{
       const person=shootPerson(item.personId);
-      return `<article class="shoot-entry"><span class="shoot-time">${esc(item.time)}${item.end?' — '+esc(item.end):''}</span><h3 data-user-content>${esc(item.title)}</h3>${person?`<p data-user-content>${esc(person.name)} · ${esc(person.city)}</p>`:''}${item.location?`<p data-user-content>⌖ ${esc(item.location)}</p>`:''}${item.notes?`<p class="shoot-notes" data-user-content>${esc(item.notes)}</p>`:''}<div class="shoot-actions">${item.id.startsWith('agreement-')?`<button data-plan-board="${esc(item.id)}">${tr('Мудборд и подготовка','Moodboard and preparation')}</button><button data-plan-cancel="${esc(item.id)}">${tr('Отменить съёмку','Cancel shoot')}</button>`:''}<button data-edit-shoot="${esc(item.id)}">${tr('Редактировать','Edit')}</button>${person?`<button data-shoot-chat="${person.id}">${tr('Открыть чат','Open chat')} ↗</button>`:''}</div></article>`;
+      return `<article class="shoot-entry"><span class="shoot-time">${esc(item.time)}${item.end?' — '+esc(item.end):''}</span><h3 data-user-content>${esc(item.title)}</h3>${person?`<p data-user-content>${esc(person.name)} · ${esc(person.city)}</p>`:''}${item.location?`<p data-user-content>⌖ ${esc(item.location)}</p>`:''}${item.notes?`<p class="shoot-notes" data-user-content>${esc(item.notes)}</p>`:''}<div class="shoot-actions">${item.projectId?`<button data-shoot-open="${esc(item.projectId)}">${tr('Карточка съёмки','Shoot card')}</button>`:''}${item.id.startsWith('agreement-')?`<button data-plan-board="${esc(item.id)}">${tr('Мудборд и подготовка','Moodboard and preparation')}</button><button data-plan-cancel="${esc(item.id)}">${tr('Отменить съёмку','Cancel shoot')}</button>`:''}${!item.projectId?`<button data-edit-shoot="${esc(item.id)}">${tr('Редактировать','Edit')}</button>`:''}${person?`<button data-shoot-chat="${person.id}">${tr('Открыть чат','Open chat')} ↗</button>`:''}</div></article>`;
     }).join(''):`<div class="calendar-empty"><span aria-hidden="true">＋</span><p>${tr('На этот день съёмок пока нет.','No shoots planned for this day.')}</p><button id="calendar-empty-add">${tr('Запланировать съёмку','Plan a shoot')}</button></div>`}</section></div>
     <p class="demo-banner">${tr('Личный календарь на этом устройстве. Время указывай по месту съёмки. Запись не отправляет приглашение собеседнику.','Your personal calendar on this device. Use local time at the shoot location. Saving does not send an invitation.')}</p>`;
   const content=document.getElementById('content');
+  bindShootCards(content);
+  bindAvailability(content,renderCalendar);
+  document.getElementById("calendar-availability").onclick=()=>openAvailabilityEditor(calendarDay,renderCalendar);
   content.querySelectorAll('[data-day]').forEach(button=>button.onclick=()=>{calendarDay=button.dataset.day;renderCalendar();});
   const move=step=>{calendarDay=shootDateKey(new Date(year,month-1+step,1,12));calendarMonth=calendarDay.slice(0,7);renderCalendar();};
   document.getElementById('calendar-prev').onclick=()=>move(-1);
@@ -51,6 +56,7 @@ function renderCalendar() {
 
 function openShootEditor(id=null,personId=null) {
   const existing=id?savedShoots().find(item=>item.id===id):null;
+  if(existing?.projectId){openShootProposal(existing.personId,existing.projectId);return;}
   if(existing?.id.startsWith('agreement-') && proposalById(existing.personId,existing.id.slice(10))) { editProposal(existing.personId,existing.id.slice(10)); return; }
   if(id&&!existing)return;
   const selectedPerson=existing?.personId??personId;

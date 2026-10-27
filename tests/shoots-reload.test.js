@@ -1,0 +1,13 @@
+const assert=(value,message)=>{if(!value)throw Error(message);};
+const id=sessionStorage.getItem('test-project-id'),project=ShootRepository.get(id);
+assert(project?.status==='completed','project status persisted across real reload');
+assert(project.history.some(h=>h.action==='reapproval'),'history persisted');
+assert(savedShoots().filter(s=>s.projectId===id).length===1,'derived calendar remains deduplicated after reload');
+assert(conversationMessages(2).filter(m=>m.shootId===id).length===1,'chat reference persists once');
+assert(state.messages[2].some(m=>m.text==='Обсудим время'),'ordinary messages persisted');
+state.chat=2;selectTab('messages');await new Promise(r=>setTimeout(r,250));
+assert(document.querySelector('.chat-attachment img'),'IndexedDB photo persists after reload');
+assert(document.querySelector('.chat-attachment audio'),'IndexedDB audio persists after reload');
+assert(!performance.getEntriesByType('resource').some(r=>new URL(r.name).pathname.startsWith('/wkadre/')&&r.responseStatus>=400),'no failed subdirectory resources');
+selectTab('shoots');await new Promise(r=>setTimeout(r,100));
+return 'real reload: projects/history/messages/IndexedDB attachments/calendar preserved; pathname '+location.pathname;

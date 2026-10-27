@@ -1,7 +1,7 @@
 // Run with: swift -module-cache-path /tmp/vkadre-test-cache tests/run.swift
 const memory = {};
 let storageFails = false, calendarFails = false, shoots = [], selectedTab = '';
-const localStorage = {setItem(key,value) { if(storageFails)throw Error('quota'); memory[key]=value; }};
+const localStorage = {getItem(key) { return memory[key] ?? null; }, setItem(key,value) { if(storageFails)throw Error('quota'); memory[key]=value; }};
 function read(key,fallback) { return memory['kadr-html-'+key] ? JSON.parse(memory['kadr-html-'+key]) : fallback; }
 function tr(ru,en) { return ru; }
 function toast() {}

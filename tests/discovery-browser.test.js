@@ -1,0 +1,12 @@
+// Prepared for isolated WebKit; not yet executed.
+const wait=()=>new Promise(r=>setTimeout(r,160));
+const assert=(v,m)=>{if(!v)throw Error(m);};
+selectTab('locations');await wait();assert(document.querySelectorAll('.location-card').length===3,'three fictional examples');
+let form=document.querySelector('#location-filters');form.elements.budget.value='0';form.dispatchEvent(new Event('input'));assert(document.querySelectorAll('.location-card').length===1,'zero sample budget');document.querySelector('#location-reset').click();assert(document.querySelectorAll('.location-card').length===3,'reset');
+selectTab('statistics');await wait();assert(document.querySelectorAll('.statistic-card').length===8,'statistics cards');assert([...document.querySelectorAll('.statistic-card>strong')].filter(n=>n.textContent==='—').length===4,'unknown metrics not fabricated');
+selectTab('messages');await wait();state.chat=2;renderInbox();await wait();const original=JSON.stringify(state.messages[2]||[]);
+let report=document.querySelector('[data-report-message]');if(report){report.click();await wait();form=document.querySelector('#workflow-form');form.elements.details.value='Browser test report';form.requestSubmit();await wait();assert(SafetyStore.snapshot().data.reports.some(r=>r.kind==='message'),'message report draft');}
+document.querySelector('#block-chat-person').click();await wait();closeModal();assert(!SafetyStore.blocked(2),'dismiss block preserves access');document.querySelector('#block-chat-person').click();await wait();document.querySelector('#workflow-form').requestSubmit();await wait();assert(SafetyStore.blocked(2),'confirmed block');assert(!document.querySelector('[data-contact="2"]'),'blocked contact hidden');assert(!catalogPeople().some(p=>p.id===2),'blocked profile hidden');assert(JSON.stringify(state.messages[2]||[])===original,'history preserved');
+selectTab('safety');await wait();document.querySelector('[data-unblock="2"]').click();await wait();document.querySelector('#workflow-form').requestSubmit();await wait();assert(!SafetyStore.blocked(2)&&catalogPeople().some(p=>p.id===2),'unblock restores profile');
+for(const language of ['ru','en'])for(const theme of ['light','dark'])for(const tab of ['locations','statistics','safety']){settings.language=language;settings.theme=theme;applySettings();selectTab(tab);await wait();assert(document.documentElement.scrollWidth<=innerWidth+1,'page fits '+tab);}
+return 'fictional locations, filters, honest metrics, message report, block/unblock, preserved history and responsive pages';

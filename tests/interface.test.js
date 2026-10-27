@@ -8,7 +8,7 @@ const fits=label=>{
   assert(logo.getBoundingClientRect().right<=actions.getBoundingClientRect().left+1,label+' header collision');
   assert(header.getBoundingClientRect().right<=innerWidth+1,label+' header overflow');
 };
-assert(typeof openProposal==='undefined','proposal creation removed');
+assert(typeof openShootProposal==='function','proposal editor available');
 assert(!document.querySelector('nav a[href="#calendar"]'),'calendar absent from primary nav');
 assert(document.querySelector('nav a[href="#profile"]'),'profile in primary nav');
 for(const route of ['home','search','casting','messages','profile','calendar','portfolio','saved','settings','membership','reminders']) {
@@ -41,7 +41,7 @@ assert(document.querySelector('.file-name').textContent==='portrait.png','filena
 document.querySelector('#apply-crop').click();await wait();assert(!document.querySelector('#profile-preview').hidden,'crop result previews');
 closeModal();
 state.chat=2;selectTab('messages');await wait();fits('selected chat');assert(!document.querySelector('#plan-shoot'),'proposal absent in chat');
-selectTab('search');await wait();openPerson(2);await wait();fits('person preview');assert(!document.querySelector('.preview-actions').textContent.includes('Предложить'),'proposal absent in person preview');closeModal();
+selectTab('search');await wait();openPerson(2);await wait();fits('person preview');assert(document.querySelector('.propose-shoot-button'),'proposal available in person preview');closeModal();
 // Full profile and English labels exercise long text and theme-independent widths.
 selectTab('user/'+personUsername(people[1]));await wait();fits('full profile');
 settings.language='en';applySettings();selectTab('membership');await wait();fits('English Pro');

@@ -1,0 +1,12 @@
+"use strict";
+const SafetyStore=(()=>{
+  const key='kadr-html-safety-v1';
+  function snapshot(){try{const raw=localStorage.getItem(key),data=raw?JSON.parse(raw):{version:1,blocked:[],reports:[]};if(!data||data.version!==1||!Array.isArray(data.blocked)||data.blocked.some(id=>!Number.isInteger(id)||id<=0)||!Array.isArray(data.reports)||data.reports.some(r=>!r||typeof r.id!=='string'||!['profile','message','casting'].includes(r.kind)||typeof r.target!=='string'||typeof r.reason!=='string'))throw Error();return {raw,data};}catch{return {error:true};}}
+  function save(snap,data){if(snap.error)return false;try{if(localStorage.getItem(key)!==snap.raw)return false;localStorage.setItem(key,JSON.stringify(data));return true;}catch{return false;}}
+  function blocked(id){return snapshot().data?.blocked.includes(Number(id))||false;}
+  function block(id,enabled){if(!Number.isInteger(id)||id<=0)return false;const snap=snapshot();if(snap.error)return false;const ids=snap.data.blocked.filter(x=>x!==id);if(enabled)ids.push(id);return save(snap,{...snap.data,blocked:ids});}
+  function report(kind,target,reason,details,context=''){const snap=snapshot();if(snap.error||!['profile','message','casting'].includes(kind)||!String(target).trim()||!['spam','fraud','abuse','impersonation','other'].includes(reason)||!details.trim()||details.length>2000)return false;return save(snap,{...snap.data,reports:[{id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),kind,target:String(target).slice(0,300),reason,details:details.trim(),context:String(context).slice(0,500),status:'draft',createdAt:Date.now()},...snap.data.reports]});}
+  return {snapshot,blocked,block,report};
+})();
+function localStatistics(projects,castings,saved){return {completed:projects.filter(p=>p.status==='completed').length,sent:projects.filter(p=>p.sentAt>0).length,responses:castings.filter(c=>!c.demo).reduce((n,c)=>n+(c.responses||[]).filter(r=>r.personId===0).length,0),saved:new Set(saved).size};}
+function filterLocations(items,filters){const contains=(a,b)=>String(a).toLocaleLowerCase().includes(String(b||'').trim().toLocaleLowerCase());return items.filter(p=>(!filters.city||p.city===filters.city)&&(!filters.type||p.type===filters.type)&&(!filters.query||contains([p.name,p.nameEn,p.description,p.descriptionEn,p.equipment,p.equipmentEn].join(' '),filters.query))&&(!filters.budget||p.price<=Number(filters.budget)));}

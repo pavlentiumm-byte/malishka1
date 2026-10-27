@@ -1,0 +1,57 @@
+const wait=()=>new Promise(resolve=>setTimeout(resolve,180));
+const until=async predicate=>{for(let i=0;i<30&&!predicate();i++)await wait();};
+const assert=(value,message)=>{if(!value)throw Error(message);};
+const fill=(form,values)=>{for(const [name,value] of Object.entries(values))form.elements.namedItem(name).value=value;form.requestSubmit();};
+const fits=label=>{assert(document.documentElement.scrollWidth<=innerWidth+1,label+' page overflow');const modal=document.querySelector('.modal');if(modal)assert(modal.scrollWidth<=modal.clientWidth+1,label+' modal overflow');};
+assert(document.getElementById('content').textContent.length>0,'home loads');
+assert(!document.querySelector('nav a[href="#calendar"]'),'calendar still in personal tools');
+selectTab('search');await wait();assert(document.querySelectorAll('[data-profile-card]').length>0,'catalog loads');
+openPerson(2);await wait();assert(document.querySelector('.propose-shoot-button'),'profile preview proposal action');document.querySelector('.propose-shoot-button').click();await wait();fits('proposal form');
+let form=document.querySelector('#shoot-proposal-form');
+form.elements.title.value='Новый портрет';form.querySelector('#shoot-save-draft').click();await wait();
+let p=ShootRepository.snapshot().records[0];sessionStorage.setItem('test-project-id',p.id);
+assert(p.status==='draft'&&conversationMessages(2).every(m=>m.shootId!==p.id),'partial draft not sent');
+document.querySelector('[data-shoot-action="send"]').click();assert(document.querySelector('#shoot-action-error').textContent.length>0,'partial send error shown');
+document.querySelector('#shoot-edit').click();await wait();form=document.querySelector('#shoot-proposal-form');
+const details={title:'Новый портрет <script>alert(1)</script>',concept:'Мягкий дневной свет',date:offsetDay(5),time:'14:00',duration:'90',city:'Москва',location:'Студия у парка',role:'Модель',requirements:'Фото через неделю',comment:'Обсудим одежду'};
+form.elements.format.value='paid';form.elements.format.dispatchEvent(new Event('change'));
+assert(!document.querySelector('#shoot-payment-fields').hidden&&form.elements.amount.required,'conditional payment input');
+fill(form,{...details,amount:'12000',currency:'RUB'});await wait();
+p=ShootRepository.get(p.id);assert(p.status==='draft','review does not send');assert(!document.querySelector('.shoot-project-card script'),'user content escaped');
+document.querySelector('#shoot-edit').click();await wait();document.querySelector('#shoot-discard-edit').click();await wait();assert(ShootRepository.get(p.id).rev===p.rev,'cancel editing does not mutate draft');
+document.querySelector('[data-shoot-action="send"]').click();await wait();
+assert(state.tab==='messages'&&document.querySelector('[data-shoot-card]'),'card appears in chat');assert(conversationMessages(2).filter(m=>m.shootId===p.id).length===1,'one card per project');
+assert(!savedShoots().some(s=>s.projectId===p.id),'pending not in confirmed calendar');
+const input=document.querySelector('#message-input');input.value='Обсудим время';input.dispatchEvent(new Event('input'));document.querySelector('#chat-form').requestSubmit();await wait();
+assert(state.messages[2].some(m=>m.text==='Обсудим время'),'ordinary message saved alongside card');
+// Existing image upload path remains functional with virtual project cards in the list.
+const canvas=document.createElement('canvas');canvas.width=40;canvas.height=40;canvas.getContext('2d').fillRect(0,0,40,40);
+const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+const transfer=new DataTransfer();transfer.items.add(new File([blob],'test.png',{type:'image/png'}));const photo=document.querySelector('#chat-photo');photo.files=transfer.files;photo.dispatchEvent(new Event('change'));await wait();await wait();
+assert(document.querySelector('#chat-draft img'),'image draft created');document.querySelector('#chat-form').requestSubmit();await wait();await wait();
+await until(()=>document.querySelector('.chat-attachment img'));assert(document.querySelector('.chat-attachment img'),'image message rendered: '+document.querySelector('#chat-media-status')?.textContent+' / '+JSON.stringify(state.messages[2].map(m=>({kind:m.kind,attachment:m.attachment}))));
+// Audio playback is tested using a local WAV fixture; microphone capture is not simulated.
+const wav=new ArrayBuffer(46),dv=new DataView(wav);const ascii=(at,s)=>[...s].forEach((c,i)=>dv.setUint8(at+i,c.charCodeAt(0)));ascii(0,'RIFF');dv.setUint32(4,38,true);ascii(8,'WAVEfmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,8000,true);dv.setUint32(28,16000,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);ascii(36,'data');dv.setUint32(40,2,true);
+await chatAttachmentStore('test-stage1-audio',new Blob([wav],{type:'audio/wav'}));state.messages[2].push({kind:'audio',attachment:'test-stage1-audio',direction:'outgoing',createdAt:Date.now(),time:'14:05'});store('messages');renderChat();await wait();
+assert(document.querySelector('.chat-attachment audio'),'audio attachment rendering survives');assert(document.querySelector('#record-voice'),'voice control retained');
+document.querySelector('[data-shoot-open]').click();await wait();
+document.querySelector('.shoot-recipient-demo').open=true;document.querySelector('[data-shoot-action="accept"]').click();await wait();
+p=ShootRepository.get(p.id);assert(p.status==='confirmed'&&p.history.at(-1).actor==='recipient-demo','explicit demo acceptance');assert(savedShoots().filter(s=>s.projectId===p.id).length===1,'confirmation automatically adds one calendar event');
+document.querySelector('#shoot-go-calendar').click();await wait();assert(document.querySelector('[data-shoot-open]'),'calendar links project');
+document.querySelector('[data-shoot-open]').click();document.querySelector('#shoot-edit').click();await wait();
+form=document.querySelector('#shoot-proposal-form');assert(document.querySelector('.shoot-change-warning'),'reapproval warning');fill(form,{time:'16:00'});await wait();p=ShootRepository.get(p.id);
+assert(p.status==='pending'&&!savedShoots().some(s=>s.projectId===p.id),'editing invalidates calendar confirmation');
+assert(p.history.at(-1).changes.some(c=>c.field==='time'&&c.to==='16:00'),'history includes changed condition');
+document.querySelector('.shoot-recipient-demo').open=true;document.querySelector('[data-shoot-action="discuss"]').click();await wait();assert(state.tab==='messages','demo discussion returns to chat');
+document.querySelector('[data-shoot-open]').click();document.querySelector('.shoot-recipient-demo').open=true;document.querySelector('[data-shoot-action="accept"]').click();await wait();
+assert(savedShoots().filter(s=>s.projectId===p.id).length===1&&savedShoots().find(s=>s.projectId===p.id).time==='16:00','reaccept has no duplicate and updates time');
+document.querySelector('#shoot-complete').click();document.querySelector('#shoot-confirm').requestSubmit();await wait();assert(ShootRepository.get(p.id).status==='completed','completion works');assert(!document.querySelector('#shoot-edit'),'completed is read only');closeModal();
+// Stale revision is rejected without losing form values.
+openShootProposal(3);await wait();form=document.querySelector('#shoot-proposal-form');fill(form,{...details,title:'Вторая съёмка'});await wait();let second=ShootRepository.snapshot().records.find(r=>r.id!==p.id);document.querySelector('[data-shoot-action="send"]').click();await wait();openShootDetails(second.id);document.querySelector('#shoot-edit').click();await wait();
+ShootRepository.transition(second.id,ShootRepository.get(second.id).rev,'discuss');form=document.querySelector('#shoot-proposal-form');fill(form,{title:'Несохранённое изменение'});assert(document.querySelector('#shoot-proposal-error').textContent.includes('другой вкладке'),'stale editor rejected');assert(form.elements.title.value==='Несохранённое изменение','stale editor retains user text');closeModal();
+openShootDetails(second.id,true);document.querySelector('#shoot-decline').click();fill(document.querySelector('#shoot-confirm'),{reason:'Не подходит дата'});await wait();assert(ShootRepository.get(second.id).response==='declined','decline saved');closeModal();
+// RU/EN, theme and full profile entry point.
+settings.language='en';settings.theme='dark';applySettings();selectTab('shoots');await wait();assert(document.querySelector('#content').textContent.includes('Completed'),'English status');openShootDetails(p.id);await wait();fits('dark English details');assert(document.querySelector('.shoot-local-note').textContent.includes('Local demo'),'demo notice translated');closeModal();
+settings.language='ru';settings.theme='light';applySettings();selectTab('user/'+personUsername(people[1]));await wait();assert(document.querySelector('.propose-shoot-button'),'full profile entry point');
+selectTab('shoots');await wait();fits('my shoots');
+return 'stage 1: drafts, validation, review/send, personal text/image/audio playback, demo accept/discuss/decline, auto-calendar, reapproval, history, completion, conflict handling, themes and languages';

@@ -5,6 +5,63 @@
 // а не отдельные коммиты и промежуточные изменения. Даты — YYYY-MM-DD.
 // Тексты в каждой паре: [русский, английский].
 const releaseNotes = [
+  {
+    date: "2026-10-27",
+    title: ["Локации, статистика и безопасность · этап 6", "Locations, statistics and safety · stage 6"],
+    changes: [
+      {title: ["Примеры локаций", "Example locations"], text: ["Каталог вымышленных студий и площадок с поиском и фильтрами. Фотографии иллюстративные, цены условные; реального бронирования нет.", "A searchable directory of fictional studios and venues. Photos are illustrative and prices are samples; real booking is unavailable."]},
+      {title: ["Локальная статистика", "Local statistics"], text: ["Отклики, завершённые съёмки и другие измеримые локальные действия. Недоступные показатели аудитории не заменяются выдуманными числами.", "Responses, completed shoots and other measurable local actions. Unavailable audience metrics are not replaced with invented numbers."]},
+      {title: ["Блокировки и жалобы", "Blocks and reports"], text: ["Блокировка скрывает профиль и личный чат, сохраняя историю. Разблокировка доступна в настройках безопасности. Жалобы на профили, сообщения и объявления сохраняются как черновики без отправки модераторам.", "Blocking hides the profile and personal chat while preserving history. Unblock in safety settings. Profile, message and announcement reports are saved as drafts without delivery to moderators."]}
+    ],
+    note: ["Локальная демонстрация; серверная модерация и реальные площадки не подключены.", "Local demo; server moderation and real venues are not connected."]
+  },
+  {
+    date: "2026-10-27",
+    title: ["Портфолио и отзывы · этап 5", "Portfolio and reviews · stage 5"],
+    changes: [
+      {title: ["История проекта", "Project details"], text: ["Концепция, дата, жанр, условия использования и команда с ролями. Отметки участников неподтверждённые; старые фото сохранены.", "Concept, date, genre, usage terms and team roles. Member tags are unconfirmed; existing photos are preserved."]},
+      {title: ["Отзывы после съёмки", "Post-shoot reviews"], text: ["Тестовая оценка и комментарий доступны после завершения локальной съёмки. Жалобы сохраняются черновиками без отправки модераторам.", "Test scores and comments are available after completing a local shoot. Reports are saved as drafts without delivery to moderators."]},
+      {title: ["Верификация", "Verification"], text: ["Можно сохранить тип будущей проверки. Документы не запрашиваются, реальная проверка не запускается, значок подтверждения не выдаётся.", "Save the type of future verification. No documents are requested, real verification is not started and no verified badge is granted."]}
+    ],
+    note: ["Локальная демонстрация. Тестовые оценки не формируют реальный рейтинг.", "Local demo. Test scores do not form a real rating."]
+  },
+  {
+    date: "2026-10-27",
+    title: ["Совместная подготовка · этап 4", "Team preparation · stage 4"],
+    changes: [
+      {title: ["Группы и команды", "Groups and teams"], text: ["Локальные групповые чаты с текстом, изображениями, составом и ролями. Сохранённые команды доступны из избранного и используются при создании съёмки.", "Local group chats with text, images, members and roles. Saved teams are accessible from favorites and can be used when creating a shoot."]},
+      {title: ["Мудборды", "Moodboards"], text: ["Изображения и ссылки с комментариями, редактированием и изменением порядка. Мудборд и группу можно привязать к съёмке и открыть из её карточки.", "Images and links with comments, editing and reordering. Link a board or group to a shoot and open it from the shoot card."]}
+    ],
+    note: ["Всё сохраняется в этом браузере. Добавление участника не отправляет приглашение и не подтверждает его участие.", "Everything stays in this browser. Adding a member does not send an invitation or confirm participation."]
+  },
+  {
+    date: "2026-10-27",
+    title: ["Календарь доступности · этап 3", "Availability calendar · stage 3"],
+    changes: [
+      {title: ["Статусы дат", "Date statuses"], text: ["В календаре можно отметить свободные, занятые и предварительно забронированные даты. Подтверждённые съёмки отмечаются автоматически, включая следующий день при ночной съёмке.", "Mark dates available, busy or tentative. Confirmed shoots appear automatically, including the next day for overnight shoots."]},
+      {title: ["Видимость расписания", "Schedule visibility"], text: ["В профиле доступны приватный режим, только свободные даты или все статусы. Предпросмотр показывает, что будет видно другим, без адресов и участников. Настройка локальная; расписание не публикуется.", "Choose private, available dates only or all statuses. Preview what others would see without addresses or participants. This is local; the schedule is not published."]}
+    ],
+    note: ["В предложении съёмки показана твоя занятость. Расписание демонстрационных специалистов неизвестно — дату нужно уточнить в чате.", "Proposals show your availability. Demo specialists have no shared schedule; discuss the date in chat."]
+  },
+  {
+    date: "2026-10-27",
+    title: ["Поиск команды · этап 2", "Team recruitment · stage 2"],
+    changes: [
+      {title: ["Подробные объявления", "Detailed announcements"], text: ["Описание, жанр, несколько специальностей и число мест, бюджет, требования, срок откликов, изображения и ссылки на референсы. Добавлены редактирование и удаление с подтверждением.", "Description, genre, multiple roles and places, budget, requirements, application deadline, images and reference links. Edit announcements or delete with confirmation."]},
+      {title: ["Подбор команды", "Team selection"], text: ["Фильтры учитывают жанр и все роли. У откликов появился статус «Принят», а заполнение мест контролируется. Действия автора и участника остаются локальной демонстрацией.", "Filters include genre and all roles. Responses can be accepted with capacity checks. Organizer and participant actions remain a local demo."]}
+    ],
+    note: ["Существующие объявления и отклики сохранены. Данные не отправляются другим людям.", "Existing announcements and responses are preserved. Data is not sent to other people."]
+  },
+  {
+    date: "2026-10-27",
+    title: ["Съёмки: черновики и согласование · этап 1", "Shoots: drafts and approval · stage 1"],
+    changes: [
+      {title: ["Полное предложение", "Detailed proposals"], text: ["В профили возвращена кнопка «Предложить съёмку». Добавлены концепция, дата, продолжительность, место, роль и оплата. Черновик можно проверить и отредактировать до добавления в локальный чат.", "Profiles include Propose a shoot again. Add concept, date, duration, location, role and payment. Review and edit drafts before adding them to the local chat."]},
+      {title: ["Статусы и история", "Statuses and history"], text: ["В отдельном деморежиме можно принять, отклонить или обсудить предложение. Изменение подтверждённых условий требует повторного согласования. История сохраняет старые и новые значения.", "Explicit demo recipient actions allow accepting, declining and discussing proposals. Changes to confirmed terms require approval again. History preserves old and new values."]},
+      {title: ["Чат и календарь", "Chat and calendar"], text: ["Подтверждённые съёмки автоматически попадают в календарь без дублей. Черновики и история проектов доступны в профиле → Мои съёмки.", "Confirmed shoots appear in the calendar automatically without duplicates. Drafts and project history are in Profile → My shoots."]}
+    ],
+    note: ["Локальная демонстрация: ответы получателя не являются действиями реального человека. Старые переписки, события и портфолио сохраняются.", "Local demo: recipient replies are not actions by a real person. Existing chats, events and portfolios are preserved."]
+  },
 {
   "date": "2026-10-27",
   "title": [

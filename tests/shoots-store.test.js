@@ -1,0 +1,43 @@
+const saved = {};
+let quota=false;
+const localStorage={getItem:key=>Object.hasOwn(saved,key)?saved[key]:null,setItem:(key,value)=>{if(quota)throw Error('quota');saved[key]=value;}};
+function assert(value,message){if(!value)throw Error(message);}
+function runShootStoreTests(){
+  const valid={title:'Portrait',concept:'Natural light',date:'2026-12-01',time:'12:00',duration:90,city:'Moscow',location:'Studio',format:'paid',amount:'10000',currency:'RUB',role:'Model',requirements:'Usage terms',comment:''};
+  const participants=[{id:0,name:'Me',role:'Photographer'},{id:2,name:'Other',role:'Model'}];
+  let result=ShootRepository.create(2,valid,participants);assert(result.ok,'create draft');let p=result.record;
+  assert(p.status==='draft'&&!p.sentAt,'draft not in chat');
+  const before=localStorage.getItem(ShootRepository.key);
+  assert(!ShootRepository.create(2,{...valid,date:'2026-02-30'},participants).ok,'reject impossible date');
+  assert(!ShootRepository.create(2,{...valid,time:'25:00'},participants).ok,'reject impossible time');
+  assert(!ShootRepository.create(2,{...valid,duration:0},participants).ok,'reject duration');
+  assert(localStorage.getItem(ShootRepository.key)===before,'invalid fields never write');
+  result=ShootRepository.edit(p.id,p.rev,{...valid,title:'New title'});assert(result.ok,'draft editable');p=result.record;
+  result=ShootRepository.transition(p.id,p.rev,'send');assert(result.ok,'send');p=result.record;assert(p.status==='pending'&&p.sentAt>0,'sent is pending');
+  assert(!ShootRepository.transition(p.id,p.rev,'send').ok,'no duplicate send');
+  result=ShootRepository.transition(p.id,p.rev,'accept');assert(result.ok,'recipient accepts');p=result.record;assert(p.status==='confirmed'&&p.response==='accepted','confirmed');
+  assert(p.history.at(-1).actor==='recipient-demo','recipient action labelled demo');
+  p=ShootRepository.edit(p.id,p.rev,{...valid,title:'New title',comment:'Bring an outfit'}).record;assert(p.status==='confirmed'&&p.response==='accepted','comment-only update keeps approval');
+  const stale=p.rev;result=ShootRepository.edit(p.id,p.rev,{...valid,title:'New title',time:'15:00'});assert(result.ok,'edit confirmed');p=result.record;
+  assert(p.status==='pending'&&p.response==='pending','key change invalidates approval');
+  assert(p.history.at(-1).action==='reapproval'&&p.history.at(-1).changes.some(c=>c.field==='time'&&c.from==='12:00'&&c.to==='15:00'),'history retains before and after');
+  assert(ShootRepository.transition(p.id,stale,'accept').error==='conflict','reject stale confirmation');
+  const stable=localStorage.getItem(ShootRepository.key);quota=true;
+  assert(!ShootRepository.transition(p.id,p.rev,'accept').ok,'quota failure reported');assert(localStorage.getItem(ShootRepository.key)===stable,'quota keeps prior data');quota=false;
+  p=ShootRepository.transition(p.id,p.rev,'accept').record;
+  p=ShootRepository.transition(p.id,p.rev,'complete').record;assert(p.status==='completed','complete');
+  assert(!ShootRepository.edit(p.id,p.rev,valid).ok,'completed terms read only');
+  let declined=ShootRepository.create(2,{...valid,format:'discuss',amount:''},participants).record;
+  declined=ShootRepository.transition(declined.id,declined.rev,'send').record;
+  assert(!ShootRepository.transition(declined.id,declined.rev,'decline',' ').ok,'reason required');
+  declined=ShootRepository.transition(declined.id,declined.rev,'decline','Schedule conflict').record;assert(declined.status==='cancelled'&&declined.reason==='Schedule conflict'&&declined.response==='declined','decline retains reason');
+  const draft=ShootRepository.create(2,{...valid,title:'',concept:'',date:'',location:''},participants);assert(draft.ok,'partial draft persists');
+  assert(ShootRepository.transition(draft.record.id,draft.record.rev,'send').error==='validation','partial draft cannot send');
+  const negative=ShootRepository.create(2,{...valid,amount:'-1'},participants);assert(negative.ok,'partial payment can be drafted');assert(!ShootRepository.transition(negative.record.id,negative.record.rev,'send').ok,'negative amount cannot send');
+  const validStore=localStorage.getItem(ShootRepository.key);
+  saved[ShootRepository.key]='{broken';assert(ShootRepository.snapshot().error,'bad JSON is visible');assert(!ShootRepository.create(2,valid,participants).ok,'bad data not overwritten');assert(saved[ShootRepository.key]==='{broken','bad data preserved');
+  saved[ShootRepository.key]=JSON.stringify({schemaVersion:99,revision:1,records:[]});assert(ShootRepository.snapshot().error==='schema','future schema rejected');
+  saved[ShootRepository.key]=JSON.stringify({schemaVersion:1,revision:1,records:[{bad:true}]});assert(ShootRepository.snapshot().error==='corrupt','bad record flagged');assert(!ShootRepository.create(2,valid,participants).ok,'bad record preserved on write');
+  saved[ShootRepository.key]=validStore;assert(ShootRepository.get(p.id).status==='completed','records restore after reload');
+  assert(ShootRepository.normalize({...p,history:[{at:1e100,action:'bad'}]}).history.length===0,'invalid history timestamps discarded in view');
+}

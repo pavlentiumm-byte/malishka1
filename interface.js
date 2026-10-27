@@ -16,7 +16,11 @@ function interfaceIcon(name) {
 
 function profileToolsMarkup() {
   return `<section class="profile-tools" aria-label="${tr('Личные инструменты','Personal tools')}">
+    <a class="surface profile-tool" href="#shoots">${interfaceIcon('casting')}<span><strong>${tr('Мои съёмки','My shoots')}</strong><small>${tr('Черновики и договорённости','Drafts and agreements')}</small></span><span aria-hidden="true">↗</span></a>
     <a class="surface profile-tool" href="#calendar">${interfaceIcon('calendar')}<span><strong>${tr('Мой календарь','My calendar')}</strong><small>${tr('Даты и планы съёмок','Shoot dates and plans')}</small></span><span aria-hidden="true">↗</span></a>
+    <a class="surface profile-tool" href="#boards">${interfaceIcon("casting")}<span><strong>${tr("Мудборды и команды","Moodboards and teams")}</strong><small>${tr("Референсы и совместная подготовка","References and team preparation")}</small></span><span aria-hidden="true">↗</span></a>
+    <a class="surface profile-tool" href="#locations">${interfaceIcon("search")}<span><strong>${tr("Студии и локации","Studios and locations")}</strong><small>${tr("Демонстрационный каталог","Demo directory")}</small></span><span aria-hidden="true">↗</span></a>
+    <a class="surface profile-tool" href="#statistics">${interfaceIcon("spark")}<span><strong>${tr("Твоя статистика","Your statistics")}</strong><small>${tr("Локальные показатели","Local counts")}</small></span><span aria-hidden="true">↗</span></a>
     <a class="surface profile-tool" href="#membership">${interfaceIcon('spark')}<span><strong>${tr('ВКадре Pro','ВКадре Pro')}</strong><small>${tr('Идея будущей подписки','Explore a future subscription')}</small></span><span aria-hidden="true">↗</span></a>
   </section>`;
 }
