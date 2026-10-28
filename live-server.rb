@@ -55,7 +55,7 @@ server.mount_proc "/" do |req, res|
     next
   end
 
-  path = "/kadr.html" if path == "/" || path == "/index.html"
+  path = "/index.html" if path == "/" || path == "/kadr.html"
 
   file = File.expand_path(File.join(ROOT, path.sub(%r{\A/}, "")))
   unless file.start_with?(ROOT + File::SEPARATOR) && File.file?(file)
@@ -80,6 +80,6 @@ end
 trap("INT") { server.shutdown }
 trap("TERM") { server.shutdown }
 
-$stdout.puts "http://127.0.0.1:#{PORT}/kadr.html"
+$stdout.puts "http://127.0.0.1:#{PORT}/#home"
 $stdout.flush
 server.start
