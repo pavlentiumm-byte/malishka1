@@ -7,6 +7,16 @@
 const releaseNotes = [
   {
     date: "2026-10-27",
+    title: ["Плавный интерфейс и общая проверка", "Smoother interactions and final checks"],
+    changes: [
+      {title: ["Мягкий отклик", "Gentle feedback"], text: ["Кнопки слегка темнеют при наведении и реагируют на нажатие. Добавлены короткие переходы между разделами, появление окон и раскрытие деталей. Системное уменьшение движения отключает анимации.", "Buttons darken gently on hover and respond to presses. Short page, dialog and detail transitions respect the system reduced-motion preference."]},
+      {title: ["Галерея фотографий", "Photo gallery"], text: ["Листание стрелками, клавиатурой и горизонтальным свайпом. Вертикальная прокрутка сохранена; из галереи можно вернуться к проекту.", "Browse using arrows, keyboard or horizontal swipes. Vertical scrolling is preserved, with a return path to the project."]},
+      {title: ["Проверка совместимости", "Compatibility checks"], text: ["Проверены новые сценарии, изображения и восстановление после перезагрузки. Исправлены границы и выделение элементов, наложение списка мудбордов на меню и возврат клавиатурного фокуса из вложенных окон.", "New workflows, images and reload recovery were tested. Fixed control borders and selection, workspace lists overlapping navigation, and keyboard focus when returning from nested dialogs."]}
+    ],
+    note: ["Проверено в WebKit на мобильных и настольных ширинах, в RU/EN и обеих темах. Сайт остаётся локальной демонстрацией.", "Tested in WebKit at mobile and desktop widths, in RU/EN and both themes. The site remains a local demo."]
+  },
+  {
+    date: "2026-10-27",
     title: ["Локации, статистика и безопасность · этап 6", "Locations, statistics and safety · stage 6"],
     changes: [
       {title: ["Примеры локаций", "Example locations"], text: ["Каталог вымышленных студий и площадок с поиском и фильтрами. Фотографии иллюстративные, цены условные; реального бронирования нет.", "A searchable directory of fictional studios and venues. Photos are illustrative and prices are samples; real booking is unavailable."]},

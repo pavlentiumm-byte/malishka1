@@ -3,7 +3,7 @@ import JavaScriptCore
 let context = JSContext()!
 var failed = false
 context.exceptionHandler = { _, exception in print("FAIL: \(exception!)"); failed = true }
-for name in ["calendar.js", "collaboration.js", "availability.js", "planning.js", "castings.js", "casting-editor.js", "changelog.js", "auth.js", "interface.js", "shoots-store.js", "shoots.js", "workspace-store.js", "workspace.js", "profile-work-store.js", "profile-work.js", "discovery-store.js", "discovery.js", "app.js"] {
+for name in ["calendar.js", "collaboration.js", "availability.js", "planning.js", "castings.js", "casting-editor.js", "changelog.js", "auth.js", "interface.js", "shoots-store.js", "shoots.js", "workspace-store.js", "workspace.js", "profile-work-store.js", "profile-work.js", "discovery-store.js", "discovery.js", "motion.js", "app.js"] {
     let source = try String(contentsOfFile: name, encoding: .utf8)
     context.objectForKeyedSubscript("Function").call(withArguments: [source])
     print("Parsed \(name)")

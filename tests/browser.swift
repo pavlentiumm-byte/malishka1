@@ -30,9 +30,11 @@ class Delegate: NSObject, WKNavigationDelegate {
                 if self.phase == 0 && CommandLine.arguments.count > 4 {
                     self.phase=1;self.started=false;webView.reload();return
                 }
+                webView.evaluateJavaScript("document.getAnimations().forEach(a=>{if(a.effect?.getTiming().iterations!==Infinity){try{a.finish()}catch{}}})") { _,_ in
                 webView.takeSnapshot(with:nil) { image,error in
-                    if let image=image,let data=image.tiffRepresentation,let bitmap=NSBitmapImageRep(data:data),let png=bitmap.representation(using:.png,properties:[:]) { try? png.write(to:URL(fileURLWithPath:"/tmp/vkadre-preview-\(Int(width)).png")) }
+                    if let image=image,let data=image.tiffRepresentation,let bitmap=NSBitmapImageRep(data:data),let png=bitmap.representation(using:.png,properties:[:]) { let name=URL(fileURLWithPath:testScript).lastPathComponent.replacingOccurrences(of:".js",with:""); let path="/tmp/vkadre-\(name)-\(Int(width)).png"; try? png.write(to:URL(fileURLWithPath:path));print("SCREENSHOT: \(path)") }
                     finish(0)
+                }
                 }
             }
         }

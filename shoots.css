@@ -60,3 +60,7 @@
 .statistic-card,.safety-panel {padding:22px;margin:16px 0;min-width:0;overflow-wrap:anywhere}
 .statistic-card h2 {font-size:18px}.statistic-card>strong {font-size:36px}.statistic-card p {color:var(--muted)}
 .chat-header {flex-wrap:wrap}.message-meta button {padding:2px 6px;font-size:12px}
+/* A workspace list is ordinary grid content, not the app's fixed sidebar. */
+aside.creative-list {position:static;inset:auto;width:auto;height:auto;padding:20px;align-items:stretch;z-index:auto;backdrop-filter:none;background:var(--surface);border:1px solid var(--line)}
+@media(max-width:700px){aside.creative-list {padding:16px;max-height:180px}}
+.creative-list button {min-height:44px;padding:11px 13px;border-radius:12px;line-height:1.5;min-width:0}

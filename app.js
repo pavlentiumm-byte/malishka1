@@ -261,6 +261,7 @@ function options(values, selected) {
 
 function render() {
   chatMediaCleanup();
+  animateRouteChange();
 
   renderShell();
   if (state.tab === "home") { renderHome(); return; }
@@ -517,8 +518,8 @@ const filtered = catalogPeople().filter(person => {
 let previousFocus = null;
 
 function showModal(html) {
-  previousFocus = document.activeElement;
   const root = document.getElementById("modal-root");
+  if (!root.contains(document.activeElement)) previousFocus = document.activeElement;
 
   root.innerHTML = '<div class="overlay">' + html + '</div>';
   document.body.style.overflow = "hidden";
@@ -568,13 +569,7 @@ function portfolioPreview(projects) {
   return `<section class="profile-portfolio"><h2>${tr('Портфолио','Portfolio')}</h2>${projects.length ? `<div class="project-previews">${projects.map((project,i)=>`<button type="button" class="preview-project" data-preview-project="${i}">${project.photos[0] ? `<img src="${esc(project.photos[0].src)}" alt="${esc(project.name)}" loading="lazy">` : '<span class="preview-placeholder">◇</span>'}<strong data-user-content>${esc(project.name)}</strong><small>${project.photos.length} ${tr('фото','photos')}</small></button>`).join('')}</div>` : `<p>${tr('Портфолио пока не добавлено.','No portfolio yet.')}</p>`}</section>`;
 }
 function bindPortfolioPreview(root,projects,returnTo) {
-  root.querySelectorAll('[data-preview-project]').forEach(button=>button.onclick=()=>{
-    const project=projects[Number(button.dataset.previewProject)];
-    showModal(`<section class="modal project-viewer" role="dialog" aria-modal="true" aria-labelledby="project-view-title"><button class="close" aria-label="${tr('Закрыть','Close')}">×</button><button id="back-to-person" class="back-link">← ${tr('К профилю','Back to profile')}</button><h2 id="project-view-title" data-user-content>${esc(project.name)}</h2>${project.demo ? `<p class="demo-banner">${tr("Демонстрационная подборка. Фотографии используются как иллюстрации.","Demo collection. Photos are used for illustration.")}</p>` : ""}${portfolioMetadataMarkup(project)}<div class="project-photos">${project.photos.map(photo=>`<img src="${esc(photo.src)}" alt="${esc(photo.name)}" loading="lazy">`).join('') || `<p>${tr('В проекте пока нет фотографий.','No photos in this project yet.')}</p>`}</div></section>`);
-    const back=document.getElementById('back-to-person');
-    back.onclick=()=>{closeModal();returnTo();};
-    document.querySelector('#modal-root .close').onclick=()=>{closeModal();returnTo();};
-  });
+  root.querySelectorAll('[data-preview-project]').forEach(button=>button.onclick=()=>openPortfolioProject(projects[Number(button.dataset.previewProject)],returnTo));
 }
 
 function openPerson(id) {
@@ -1300,10 +1295,7 @@ function renderPortfolio() {
     showModal(`<section class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-title"><button class="close" aria-label="${tr('Закрыть','Close')}">×</button><h2 id="delete-title">${tr('Удалить проект?','Delete project?')}</h2><p>${tr('Подборка и все фотографии в ней будут удалены из портфолио.','The project and all its photos will be removed from your portfolio.')}</p><button class="primary" id="confirm-project-delete">${tr('Удалить','Delete')}</button></section>`);
     document.getElementById('confirm-project-delete').onclick = async () => {closeModal();if(await updatePortfolio(portfolio.filter(item=>item.id!==project.id))) {if(selectedProject===project.id)selectedProject=null;if(state.tab==='portfolio')renderPortfolio();}};
   };
-  content.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{
-    const item=project.photos[Number(button.dataset.view)];
-    showModal(`<section class="modal portfolio-lightbox" role="dialog" aria-modal="true" aria-label="${tr('Просмотр фотографии','Photo viewer')}"><button class="close" aria-label="${tr('Закрыть','Close')}">×</button><img src="${esc(item.src)}" alt="${esc(item.name)}"></section>`);
-  });
+  content.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>openPhotoGallery(project.photos,Number(button.dataset.view)));
   content.querySelectorAll('[data-move]').forEach(button=>button.onclick=async()=>{
     const i=Number(button.dataset.move),j=i+Number(button.dataset.direction),photos=[...project.photos];
     if(j<0||j>=photos.length)return;

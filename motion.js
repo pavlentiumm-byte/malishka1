@@ -1,0 +1,24 @@
+"use strict";
+const reducedMotion=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastAnimatedRoute=null;
+function animateRouteChange(){const route=location.hash||'#home',content=document.getElementById('content');if(route===lastAnimatedRoute)return;const initial=lastAnimatedRoute===null;lastAnimatedRoute=route;content.getAnimations?.().forEach(a=>a.cancel());if(initial||reducedMotion()||!content.animate)return;content.animate([{opacity:.65,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:190,easing:'cubic-bezier(.2,.7,.2,1)'});}
+function gallerySwipeDirection(dx,dy){return Math.abs(dx)>=45&&Math.abs(dx)>Math.abs(dy)*1.4?(dx<0?1:-1):0;}
+function openPhotoGallery(photos,start=0,returnTo=null){
+  if(!Array.isArray(photos)||!photos.length)return;
+  let index=Math.max(0,Math.min(photos.length-1,start)),gesture=null;
+  showModal(`<section class="modal portfolio-lightbox photo-gallery" role="dialog" aria-modal="true" aria-labelledby="gallery-title"><button type="button" class="close" aria-label="${tr('Закрыть','Close')}">×</button><div class="gallery-heading">${returnTo?`<button type="button" class="back-link" id="gallery-back">← ${tr('К проекту','Back to project')}</button>`:''}<h2 id="gallery-title">${tr('Фотографии','Photos')}</h2></div><div class="gallery-stage"><img id="gallery-image" alt="" draggable="false"></div><div class="gallery-controls"><button type="button" class="ui-secondary" id="gallery-prev" aria-label="${tr('Предыдущее фото','Previous photo')}">←</button><span id="gallery-count" aria-live="polite" aria-atomic="true"></span><button type="button" class="ui-secondary" id="gallery-next" aria-label="${tr('Следующее фото','Next photo')}">→</button></div><p class="gallery-hint">${tr('Листай стрелками или свайпом по фотографии.','Use the arrows or swipe across the photo.')}</p></section>`);
+  const modal=document.querySelector('.photo-gallery'),img=modal.querySelector('#gallery-image'),stage=modal.querySelector('.gallery-stage');
+  const draw=(direction=0)=>{const photo=photos[index];img.src=photo.src;img.alt=photo.name||tr('Фотография','Photo');modal.querySelector('#gallery-count').textContent=`${index+1} / ${photos.length}`;modal.querySelector('#gallery-prev').disabled=index===0;modal.querySelector('#gallery-next').disabled=index===photos.length-1;img.getAnimations?.().forEach(a=>a.cancel());if(direction&&!reducedMotion()&&img.animate)img.animate([{opacity:.55,transform:`translateX(${direction*10}px)`},{opacity:1,transform:'translateX(0)'}],{duration:170,easing:'ease-out'});};
+  const move=direction=>{const next=index+direction;if(next<0||next>=photos.length)return;index=next;draw(direction);};
+  modal.querySelector('#gallery-prev').onclick=()=>move(-1);modal.querySelector('#gallery-next').onclick=()=>move(1);
+  modal.querySelector('#gallery-back')?.addEventListener('click',returnTo);
+  modal.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();move(event.key==='ArrowRight'?1:-1);}});
+  stage.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'||!event.isPrimary){gesture=null;return;}gesture={id:event.pointerId,x:event.clientX,y:event.clientY};stage.setPointerCapture?.(event.pointerId);});
+  stage.addEventListener('pointerup',event=>{if(!gesture||event.pointerId!==gesture.id)return;const direction=gallerySwipeDirection(event.clientX-gesture.x,event.clientY-gesture.y);gesture=null;if(direction)move(direction);});
+  stage.addEventListener('pointercancel',()=>{gesture=null;});
+  draw();
+}
+function openPortfolioProject(project,returnTo){
+  showModal(`<section class="modal project-viewer" role="dialog" aria-modal="true" aria-labelledby="project-view-title"><button class="close" aria-label="${tr('Закрыть','Close')}">×</button><button id="back-to-person" class="back-link">← ${tr('К профилю','Back to profile')}</button><h2 id="project-view-title" data-user-content>${esc(project.name)}</h2>${project.demo?`<p class="demo-banner">${tr('Демонстрационная подборка. Фотографии используются как иллюстрации.','Demo collection. Photos are used for illustration.')}</p>`:''}${portfolioMetadataMarkup(project)}<div class="project-photos">${project.photos.map((photo,i)=>`<button type="button" data-gallery-index="${i}" aria-label="${tr('Открыть фото','Open photo')} ${i+1}"><img src="${esc(photo.src)}" alt="${esc(photo.name)}" loading="lazy"></button>`).join('')||`<p>${tr('В проекте пока нет фотографий.','No photos in this project yet.')}</p>`}</div></section>`);
+  const root=document.getElementById('modal-root');root.querySelector('#back-to-person').onclick=()=>{closeModal();returnTo();};root.querySelector('.close').onclick=()=>{closeModal();returnTo();};root.querySelectorAll('[data-gallery-index]').forEach(button=>button.onclick=()=>openPhotoGallery(project.photos,Number(button.dataset.galleryIndex),()=>openPortfolioProject(project,returnTo)));
+}
