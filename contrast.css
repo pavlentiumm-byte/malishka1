@@ -1,0 +1,16 @@
+:root {--hero-bg:#3d5447;--hero-ink:#f8faf6;--hero-muted:#dbe5db}
+:root[data-palette="sand"] {--hero-bg:#594735;--hero-ink:#fffbf4;--hero-muted:#e8ded1}
+:root[data-palette="slate"] {--hero-bg:#334c68;--hero-ink:#f7faff;--hero-muted:#d9e4f2}
+:root[data-theme="dark"] {--hero-bg:#344b3d}
+:root[data-palette="sand"][data-theme="dark"] {--hero-bg:#4d3e2e}
+:root[data-palette="slate"][data-theme="dark"] {--hero-bg:#2d4360}
+#content>.intro {background:var(--hero-bg);color:var(--hero-ink);border-radius:22px;padding:32px 34px;margin:24px 0 28px}
+#content>.intro h1 {color:var(--hero-ink);margin-top:18px}
+#content>.intro h1 em,#content>.intro p,#content>.intro .eyebrow {color:var(--hero-muted)}
+#content>.intro .back-link {color:var(--hero-ink)}
+#content>.intro .inbox-title-row h1 {margin:18px 0}
+#content>.intro .inbox-actions>summary {background:#ffffff14;border-color:#ffffff40;color:var(--hero-ink)}
+#content>.intro .inbox-actions[open]>summary {background:#ffffff24}
+#content>.intro .inbox-actions>summary:hover {background:#ffffff24}
+.verification-welcome .form-actions {gap:10px}
+@media(max-width:560px){#content>.intro {padding:26px 22px;margin:18px 0 22px;border-radius:18px}#content>.intro h1 {font-size:clamp(25px,7vw,34px)}#content>.intro .inbox-title-row {gap:8px}}

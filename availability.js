@@ -50,7 +50,7 @@ function openAvailabilityEditor(date=shootDateKey(),rerender=()=>renderCalendar(
     const days={...snapshot.days};if(data.availabilityStatus)days[data.date]=data.availabilityStatus;else delete days[data.date];
     if(saveAvailability(snapshot,days,snapshot.visibility)){closeModal();rerender();}
   });
-  const form=document.getElementById('workflow-form');form.elements.date.min='1900-01-01';form.elements.date.onchange=()=>{form.elements.availabilityStatus.value=snapshot.days[form.elements.date.value]||'';};
+  const form=document.getElementById('workflow-form');form.elements.date.min='1900-01-01';form.elements.date.onchange=()=>{form.elements.availabilityStatus.value=snapshot.days[parseFlexibleDate(form.elements.date.value)]||'';};
 }
 function openAvailabilityVisibility(rerender) {
   const snapshot=availabilitySnapshot();if(snapshot.error){toast(snapshot.error);return;}
@@ -62,6 +62,6 @@ function bindAvailability(root,rerender) {
 }
 function bindProposalAvailability(form,personId) {
   const hint=document.createElement('p');hint.className='shoot-hint';hint.setAttribute('role','status');form.elements.date.closest('.shoot-fields-grid').after(hint);
-  const update=()=>{const date=form.elements.date.value,status=ownAvailabilityDays()[date];hint.textContent=tr('Расписание специалиста недоступно: уточни дату в чате.','The specialist’s schedule is unavailable: discuss the date in chat.')+(status?` ${tr('Твоя доступность','Your availability')}: ${availabilityLabel(status)}.`:'');};
+  const update=()=>{const date=parseFlexibleDate(form.elements.date.value),status=ownAvailabilityDays()[date];hint.textContent=tr('Расписание специалиста недоступно: уточни дату в чате.','The specialist’s schedule is unavailable: discuss the date in chat.')+(status?` ${tr('Твоя доступность','Your availability')}: ${availabilityLabel(status)}.`:'');};
   form.elements.date.addEventListener('input',update);update();
 }

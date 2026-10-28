@@ -42,6 +42,7 @@ function renderMembership() {
 
 // Keep original input nodes and their change handlers: cropping/upload logic stays intact.
 function enhanceFileInputs(root=document) {
+  enhanceDateInputs(root);
   root.querySelectorAll('input[type="file"]:not([hidden])').forEach(input=>{
     if(input.dataset.fileEnhanced)return;
     input.dataset.fileEnhanced='true';

@@ -7,6 +7,14 @@
 const releaseNotes = [
   {
     date: "2026-10-28",
+    title: ["Удобнее вводить даты и открывать настройки", "Easier date entry and settings"],
+    changes: [
+      {title: ["Дата с клавиатуры", "Type dates directly"], text: ["Даты можно вводить вручную: 28.10.2026, 28/10/2026 или 28102026. Календарь доступен отдельно справа; проверка дат и прежний формат хранения сохранены.", "Type dates as 28.10.2026, 28/10/2026 or 28102026. The optional calendar remains on the right; date validation and the existing storage format are preserved."]},
+      {title: ["Вся строка настроек", "Full-width settings headers"], text: ["Разделы настроек раскрываются нажатием на всю строку заголовка, включая свободное место вокруг названия.", "Settings sections expand when you click anywhere in the heading row, including the space around the title."]}
+    ]
+  },
+  {
+    date: "2026-10-28",
     title: ["Палитры для сравнения", "Palettes to compare"],
     changes: [
       {title: ["Три варианта оформления", "Three color palettes"], text: ["К текущей палитре добавлены «Тёплый песок» и «Холодный сланец». Каждая доступна в светлом и тёмном режиме; образцы и переключение находятся в настройках внешнего вида. Выбор сохраняется.", "Warm Sand and Cool Slate join the existing palette. Each supports light and dark modes; previews and controls are in appearance settings. Your choice is saved."]},
