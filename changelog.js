@@ -6,6 +6,14 @@
 // Тексты в каждой паре: [русский, английский].
 const releaseNotes = [
   {
+    date: "2026-10-28",
+    title: ["Палитры для сравнения", "Palettes to compare"],
+    changes: [
+      {title: ["Три варианта оформления", "Three color palettes"], text: ["К текущей палитре добавлены «Тёплый песок» и «Холодный сланец». Каждая доступна в светлом и тёмном режиме; образцы и переключение находятся в настройках внешнего вида. Выбор сохраняется.", "Warm Sand and Cool Slate join the existing palette. Each supports light and dark modes; previews and controls are in appearance settings. Your choice is saved."]},
+      {title: ["Иконка диалогов", "Chat icon"], text: ["Исправлен контур значка диалогов: линия замкнута, убран излом на стыке.", "Fixed the chat icon outline: the contour is closed without the previous join kink."]}
+    ]
+  },
+  {
     date: "2026-10-27",
     title: ["Плавный интерфейс и общая проверка", "Smoother interactions and final checks"],
     changes: [

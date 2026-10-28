@@ -4,7 +4,7 @@ function interfaceIcon(name) {
   const paths={
     search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/>',
     casting:'<rect x="3" y="6" width="18" height="15" rx="3"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v3h4v-3"/>',
-    messages:'<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-1 1v-9.5a8.5 8.5 0 0 1 17 0Z"/><path d="M7 9h9M7 13h6"/>',
+    messages:'<path d="M12 3C7.03 3 3 6.81 3 11.5c0 1.65.48 3.19 1.31 4.49L3 21l5.28-1.76A9.49 9.49 0 0 0 12 20c4.97 0 9-3.81 9-8.5S16.97 3 12 3Z"/><path d="M7 9h9M7 13h6"/>',
     profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',
     calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M8 15h3M14 15h2"/>',
     settings:'<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="var(--bg)"/><circle cx="15" cy="12" r="2" fill="var(--bg)"/><circle cx="9" cy="18" r="2" fill="var(--bg)"/>',
@@ -78,3 +78,9 @@ function bindInboxActions() {
 }
 document.addEventListener('click',event=>{const actions=document.querySelector('.inbox-actions[open]');if(actions&&!actions.contains(event.target))actions.open=false;});
 document.addEventListener('keydown',event=>{const actions=document.querySelector('.inbox-actions[open]');if(event.key==='Escape'&&actions){actions.open=false;actions.querySelector('summary').focus();}});
+
+
+function paletteChoicesMarkup(){
+  const choices=[['sage','Классика','Classic','Нейтральная основа, мягкий шалфей','Neutral base, soft sage'],['sand','Тёплый песок','Warm sand','Молочный фон и спокойные кофейные оттенки','Ivory surfaces and quiet coffee tones'],['slate','Холодный сланец','Cool slate','Светлый серо-голубой и глубокий графит','Pale blue-gray and deep graphite']];
+  return `<fieldset class="setting-control palette-field"><legend>${tr('Цветовая палитра','Color palette')}</legend><div class="palette-options">${choices.map(([id,ru,en,descRu,descEn])=>`<label class="palette-choice"><input type="radio" name="palette-setting" value="${id}" ${settings.palette===id?'checked':''}><span class="palette-choice-body"><span class="palette-sample palette-sample-${id}" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>${tr(ru,en)}</strong><small>${tr(descRu,descEn)}</small></span></label>`).join('')}</div><p class="palette-hint">${tr('Выбери палитру, затем сравни её в светлом и тёмном режиме. Выбор применяется ко всему сайту.','Choose a palette, then compare its light and dark modes. Your choice applies across the site.')}</p></fieldset>`;
+}

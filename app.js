@@ -1118,7 +1118,8 @@ list.append(pendingBubble);list.scrollTop=list.scrollHeight;
 }
 
 // Разделы прототипа. Данные и настройки остаются в этом браузере.
-const settings = {...{theme:"light",language:"ru"},...read("settings",{})};
+const settings = {...{theme:"light",language:"ru",palette:"sage"},...read("settings",{})};
+if (!["sage","sand","slate"].includes(settings.palette)) settings.palette = "sage";
 if (!["light","dark"].includes(settings.theme)) settings.theme = "light";
 if (!["ru","en"].includes(settings.language)) settings.language = "ru";
 
@@ -1127,6 +1128,7 @@ const routes = ["locations","statistics","safety","groups","boards","teams","sho
 const labels = () => ({locations:tr("Студии и локации","Studios and locations"),statistics:tr("Статистика","Statistics"),safety:tr("Безопасность","Safety"),groups:tr("Групповые чаты","Group chats"),boards:tr("Мудборды","Moodboards"),teams:tr("Сохранённые команды","Saved teams"),shoots:tr("Мои съёмки","My shoots"),membership:tr("ВКадре Pro","ВКадре Pro"),reminders:tr("Напоминания","Reminders"),casting:tr("Поиск команды","Find a team"),calendar:tr("Календарь съёмок","Shoot calendar"),user:tr("Профиль пользователя","User profile"),home:tr("Главная","Home"),search:tr("Найти своих","Find your people"),messages:tr("Чаты","Chats"),profile:tr("Профиль","Profile"),portfolio:tr("Портфолио","Portfolio"),saved:tr("Избранное","Saved"),likes:tr("Симпатии","Likes"),settings:tr("Настройки","Settings")});
 function applySettings() {
   document.documentElement.dataset.theme = settings.theme;
+  document.documentElement.dataset.palette = settings.palette;
   document.documentElement.lang = settings.language;
   document.title = tr("ВКадре — модели, фотографы и творческие команды","ВКадре — models, photographers and creative teams");
 }
@@ -1367,7 +1369,7 @@ function renderSettings() {
   document.getElementById("content").innerHTML = pageIntro(tr("Настройки","Settings"),tr("Сделай ВКадре удобным для себя.","Make ВКадре feel like home.")) + `<section class="surface settings-panel"><h2>${tr("Внешний вид","Appearance")}</h2><fieldset class="setting-control"><legend>${tr("Тема оформления","Theme")}</legend><div class="segmented-control">
 <label><input type="radio" name="theme-setting" value="light" ${settings.theme==="light"?"checked":""}><span>☀ ${tr("Светлая","Light")}</span></label>
 <label><input type="radio" name="theme-setting" value="dark" ${settings.theme==="dark"?"checked":""}><span>☾ ${tr("Тёмная","Dark")}</span></label>
-</div></fieldset><fieldset class="setting-control"><legend>${tr("Язык интерфейса","Interface language")}</legend><div class="segmented-control">
+</div></fieldset>${paletteChoicesMarkup()}<fieldset class="setting-control"><legend>${tr("Язык интерфейса","Interface language")}</legend><div class="segmented-control">
 <label><input type="radio" name="language-setting" value="ru" ${settings.language==="ru"?"checked":""}><span>Русский</span></label>
 <label><input type="radio" name="language-setting" value="en" ${settings.language==="en"?"checked":""}><span>English</span></label>
 </div></fieldset>
@@ -1404,7 +1406,7 @@ function renderSettings() {
     status.textContent = tr("Соцсети сохранены и отображаются в твоём профиле.","Social links saved and displayed on your profile.");
   };
   setupSettingsSections();
-  for (const [name,key] of [["theme-setting","theme"],["language-setting","language"]]) document.querySelectorAll(`input[name="${name}"]`).forEach(input => input.onchange = event => {
+  for (const [name,key] of [["theme-setting","theme"],["language-setting","language"],["palette-setting","palette"]]) document.querySelectorAll(`input[name="${name}"]`).forEach(input => input.onchange = event => {
     settings[key] = event.target.value;
     try { localStorage.setItem("kadr-html-settings",JSON.stringify(settings)); }
     catch { toast(tr("Настройка применена, но браузер не разрешил её сохранить.","Setting applied, but browser storage is unavailable.")); }
