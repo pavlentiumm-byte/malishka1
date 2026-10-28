@@ -934,11 +934,11 @@ function renderInbox() {
   document.getElementById("content").innerHTML = `
     <section class="intro">
       <span class="eyebrow">ХОРОШИЕ ИДЕИ НАЧИНАЮТСЯ С ПРИВЕТА</span>
-      <h1>На одной волне<em>.</em></h1>
+      <div class="inbox-title-row"><h1>${tr("На одной волне","On the same wavelength")}<em>.</em></h1>${inboxActionsMarkup()}</div>
       <p>Обсуди идею своей следующей съёмки.</p>
     </section>
 
-    <div class="workflow-actions"><a href="#groups">${tr("Групповые чаты","Group chats")} ↗</a></div><section class="inbox">
+    <section class="inbox">
       <div class="contacts">
         ${contactRows()}
       </div>
@@ -952,6 +952,7 @@ function renderInbox() {
     });
   });
 
+  bindInboxActions();
   renderChat();
 }
 

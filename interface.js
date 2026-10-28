@@ -64,3 +64,17 @@ function startInterfaceEnhancements() {
   observer.observe(document.getElementById('content'),{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
   observer.observe(document.getElementById('modal-root'),{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
 }
+
+function inboxActionsMarkup() {
+  return `<details class="inbox-actions"><summary aria-label="${tr('Действия с чатами','Chat actions')}" title="${tr('Действия с чатами','Chat actions')}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary><div class="inbox-action-menu"><button type="button" id="inbox-create-group">${interfaceIcon('messages')}<span>${tr('Создать групповой чат','Create group chat')}</span></button><a href="#groups">${interfaceIcon('profile')}<span>${tr('Мои группы','My groups')}</span></a></div></details>`;
+}
+function bindInboxActions() {
+  const actions=document.querySelector('.inbox-actions');
+  if(!actions)return;
+  actions.querySelector('#inbox-create-group').onclick=()=>{actions.open=false;actions.querySelector('summary').focus();openCreativeEditor('groups');};
+  actions.querySelector('a').onclick=()=>{actions.open=false;};
+  actions.querySelector('summary').addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();actions.open=true;actions.querySelector('button').focus();}});
+  actions.addEventListener('focusout',()=>{setTimeout(()=>{if(actions.isConnected&&!actions.contains(document.activeElement))actions.open=false;},0);});
+}
+document.addEventListener('click',event=>{const actions=document.querySelector('.inbox-actions[open]');if(actions&&!actions.contains(event.target))actions.open=false;});
+document.addEventListener('keydown',event=>{const actions=document.querySelector('.inbox-actions[open]');if(event.key==='Escape'&&actions){actions.open=false;actions.querySelector('summary').focus();}});

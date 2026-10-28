@@ -122,3 +122,16 @@ h1{font-size:clamp(28px,3vw,38px);line-height:1.2;letter-spacing:-1.1px}
 #profile-button,#profile-button.active{text-decoration:none}
 .avatar-placeholder{width:88px;height:88px;border-radius:22px;background:var(--soft)}.avatar-placeholder .ui-icon{width:36px;height:36px}
 @media(max-width:560px){.profile-summary:has(.avatar-placeholder){gap:18px}.avatar-placeholder{width:64px;height:64px;border-radius:18px}.avatar-placeholder .ui-icon{width:28px;height:28px}}
+
+.inbox-title-row {display:flex;align-items:center;justify-content:space-between;gap:16px}
+.inbox-title-row h1 {min-width:0}
+.inbox-actions {position:relative;flex:0 0 auto;z-index:5}
+.inbox-actions>summary {list-style:none;width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);cursor:pointer}
+.inbox-actions>summary::-webkit-details-marker {display:none}
+.inbox-actions[open]>summary {background:var(--soft)}
+.inbox-actions>summary svg {transition:transform 160ms ease}
+.inbox-actions[open]>summary svg {transform:rotate(45deg)}
+.inbox-action-menu {position:absolute;right:0;top:calc(100% + 8px);width:260px;max-width:calc(100vw - 48px);padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px #00000014}
+.inbox-action-menu>button,.inbox-action-menu>a {display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:12px;text-align:left;border-radius:10px;text-decoration:none;font-size:13px;line-height:1.4;color:var(--ink)}
+.inbox-action-menu .ui-icon {width:18px;height:18px;flex-basis:18px;color:var(--muted)}
+@media(hover:hover){.inbox-actions>summary:hover,.inbox-action-menu>button:hover,.inbox-action-menu>a:hover {background:var(--soft)}}
