@@ -135,9 +135,3 @@ h1{font-size:clamp(28px,3vw,38px);line-height:1.2;letter-spacing:-1.1px}
 .inbox-action-menu>button,.inbox-action-menu>a {display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:12px;text-align:left;border-radius:10px;text-decoration:none;font-size:13px;line-height:1.4;color:var(--ink)}
 .inbox-action-menu .ui-icon {width:18px;height:18px;flex-basis:18px;color:var(--muted)}
 @media(hover:hover){.inbox-actions>summary:hover,.inbox-action-menu>button:hover,.inbox-action-menu>a:hover {background:var(--soft)}}
-
-
-.home-shout {container-type:inline-size;width:100%;padding:36px 0 24px}
-.home-shout h2 {margin:0;font-size:clamp(48px,16vw,280px);font-size:23cqw;font-weight:900;line-height:.88;letter-spacing:-.065em;text-align:center;color:var(--ink)}
-.home-shout h2 span {display:block}
-.home-shout h2 span+span {font-size:1.48em;margin-top:.08em}
