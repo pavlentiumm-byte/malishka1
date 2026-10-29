@@ -6,6 +6,14 @@
 // Тексты в каждой паре: [русский, английский].
 const releaseNotes = [
   {
+    date: "2026-10-29",
+    title: ["Контраст и верификация", "Contrast and verification"],
+    changes: [
+      {title: ["Контрастные заголовки страниц", "Contrasting page headers"], text: ["Тёмный шалфей в верхних блоках и светлая основная часть. Для песочной и сланцевой палитр подобраны свои оттенки.", "Dark sage headers with a light main area. Sand and slate palettes have matching header colors."]},
+      {title: ["Напоминание о верификации", "Verification reminder"], text: ["После регистрации предлагается верификация. Напоминание остаётся в колокольчике; сохранение локальной заявки не означает подтверждение профиля.", "Registration now offers verification. A reminder stays in the bell; saving a local request does not verify the profile."]}
+    ]
+  },
+  {
     date: "2026-10-28",
     title: ["Удобнее вводить даты и открывать настройки", "Easier date entry and settings"],
     changes: [

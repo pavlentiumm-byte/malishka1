@@ -1,0 +1,19 @@
+/* Text actions share spacing; icon, image and calendar controls keep their geometry. */
+:root {--button-gap:10px;--button-pad-x:18px;--button-pad-y:11px}
+:where(button) {padding:var(--button-pad-y) var(--button-pad-x);line-height:1.4;border-radius:12px}
+.primary,.ui-secondary,.workflow-actions button,.shoot-actions button,.shoot-form-actions>button,.shoot-detail-actions>button,.shoot-editor-actions>button,.crop-actions>button,.form-actions>button,.preview-full,.crop-edit,.file-choose,#restore-reminders,#reset-casting-filters {
+  min-height:44px;padding:var(--button-pad-y) var(--button-pad-x);line-height:1.4;max-width:100%;white-space:normal;overflow-wrap:anywhere;gap:8px
+}
+.workflow-actions,.form-actions,.shoot-actions,.shoot-form-actions,.shoot-detail-actions,.shoot-editor-actions,.crop-actions,.calendar-actions {
+  gap:var(--button-gap);flex-wrap:wrap;align-items:center
+}
+.modal :is(.form-actions,.shoot-form-actions,.shoot-detail-actions,.shoot-editor-actions,.crop-actions,.workflow-actions)>.primary {margin:0;width:auto}
+.form-actions>button:not(.primary) {border:1px solid var(--line);background:var(--surface)}
+.workflow-actions>button[data-ref-move],.calendar-month-nav>button {min-width:44px;min-height:44px;padding:10px}
+.tabs {gap:8px}
+.tabs button {min-height:44px;padding:11px 16px;white-space:normal}
+@media(max-width:560px) {
+  :root {--button-pad-x:16px}
+  .form-actions>button,.shoot-form-actions>button,.shoot-detail-actions>button {flex:1 1 140px}
+  .modal .form-actions>.primary {width:auto}
+}

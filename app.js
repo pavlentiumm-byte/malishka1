@@ -645,6 +645,7 @@ function catalogPeople() {
 }
 
 function openProfile() {
+  const isNewProfile = !state.profile;
   const profile = state.profile || {};
   let photo = profile.image || "";
   let loading = false;
@@ -872,7 +873,10 @@ form.elements.age.required = !organization;
     state.profile = next;
     Object.assign(state,{role:"Все",city:"",gender:"",ageMin:"",ageMax:"",genre:"Все жанры",type:"Любые условия",query:""});
     closeModal();
-    selectTab("search");
+    if (isNewProfile) {
+      if (location.hash === '#profile') { selectTab('profile'); openVerificationWelcome(); }
+      else { window.addEventListener('hashchange', openVerificationWelcome, {once:true}); selectTab('profile'); }
+    } else selectTab("search");
     toast("Профиль сохранён и появился в твоём каталоге");
   });
 }
