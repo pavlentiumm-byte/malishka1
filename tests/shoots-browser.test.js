@@ -4,7 +4,7 @@ const assert=(value,message)=>{if(!value)throw Error(message);};
 const fill=(form,values)=>{for(const [name,value] of Object.entries(values))form.elements.namedItem(name).value=value;form.requestSubmit();};
 const fits=label=>{assert(document.documentElement.scrollWidth<=innerWidth+1,label+' page overflow');const modal=document.querySelector('.modal');if(modal)assert(modal.scrollWidth<=modal.clientWidth+1,label+' modal overflow');};
 assert(document.getElementById('content').textContent.length>0,'home loads');
-assert(!document.querySelector('nav a[href="#calendar"]'),'calendar still in personal tools');
+assert(document.querySelector('nav a[href="#calendar"]'),'calendar accessible in navigation');
 selectTab('search');await wait();assert(document.querySelectorAll('[data-profile-card]').length>0,'catalog loads');
 openPerson(2);await wait();assert(document.querySelector('.propose-shoot-button'),'profile preview proposal action');document.querySelector('.propose-shoot-button').click();await wait();fits('proposal form');
 let form=document.querySelector('#shoot-proposal-form');

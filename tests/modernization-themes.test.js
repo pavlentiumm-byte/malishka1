@@ -1,0 +1,4 @@
+const wait=()=>new Promise(r=>setTimeout(r,25)),assert=(x,m)=>{if(!x)throw Error(m)};
+for(const palette of ['sage','sand','slate'])for(const theme of ['light','dark']){settings.palette=palette;settings.theme=theme;applySettings();for(const route of ['home','search','more','profile','calendar','messages']){selectTab(route);await wait();assert(document.documentElement.scrollWidth<=innerWidth+1,palette+' '+theme+' '+route);}}
+for(const el of document.querySelectorAll('script[src],link[rel=stylesheet]')){const u=new URL(el.src||el.href);if(location.pathname.startsWith('/wkadre/'))assert(u.pathname.startsWith('/wkadre/'),'asset prefix');assert((await fetch(u)).ok,'asset fetch '+u);}
+settings.palette='sage';settings.theme='light';applySettings();selectTab('home');await wait();return 'Six theme combinations, six routes and /wkadre/ assets passed';

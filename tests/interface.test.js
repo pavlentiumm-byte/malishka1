@@ -9,14 +9,14 @@ const fits=label=>{
   assert(header.getBoundingClientRect().right<=innerWidth+1,label+' header overflow');
 };
 assert(typeof openShootProposal==='function','proposal editor available');
-assert(!document.querySelector('nav a[href="#calendar"]'),'calendar absent from primary nav');
+assert(document.querySelector('nav a[href="#calendar"]'),'calendar in desktop navigation');
 assert(document.querySelector('nav a[href="#profile"]'),'profile in primary nav');
 for(const route of ['home','search','casting','messages','profile','calendar','portfolio','saved','settings','membership','reminders']) {
   selectTab(route);await wait();fits(route);
   assert(!document.querySelector('#plan-shoot'),'no proposal button on '+route);
 }
-selectTab('profile');await wait();assert(document.querySelector('.profile-tools a[href="#calendar"]'),'calendar discoverable in profile');
-document.querySelector('.profile-tools a[href="#calendar"]').click();await wait();
+selectTab('profile');await wait();assert(document.querySelector('#profile-schedule a[href="#calendar"]'),'calendar discoverable in profile');
+document.querySelector('#profile-schedule a[href="#calendar"]').click();await wait();
 assert(state.tab==='calendar','profile calendar link works');
 document.querySelector('#calendar-add').click();await wait();fits('calendar form');
 fill(document.querySelector('#shoot-form'),{title:'Тестовая съёмка',date:offsetDay(3),time:'13:00',location:'Студия',notes:'Личная запись'});await wait();
@@ -46,4 +46,4 @@ selectTab('search');await wait();openPerson(2);await wait();fits('person preview
 selectTab('user/'+personUsername(people[1]));await wait();fits('full profile');
 settings.language='en';applySettings();selectTab('membership');await wait();fits('English Pro');
 settings.language='ru';settings.theme='light';applySettings();selectTab('profile');await wait();fits('final profile');
-return 'responsive routes, header, hidden calendar, removed proposals, calendar creation, Pro preferences, theme, file upload and cropping; width '+innerWidth;
+return 'responsive routes, header, calendar navigation, proposal availability, calendar creation, Pro preferences, theme, file upload and cropping; width '+innerWidth;

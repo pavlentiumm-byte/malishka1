@@ -264,7 +264,8 @@ function render() {
   animateRouteChange();
 
   renderShell();
-  if (state.tab === "home") { renderHome(); return; }
+  if (state.tab === "home") { renderHomeDashboard(); return; }
+  if (state.tab === "more") { renderMore(); return; }
   if (state.tab === "user") { renderUserPage(); return; }
   if (state.tab === "profile") { renderProfilePage(); return; }
   if (state.tab === "portfolio") { renderPortfolio(); return; }
@@ -295,11 +296,13 @@ function render() {
       <p>Находи моделей и фотографов, с которыми хочется создавать.</p>
     </section>
 
-    ${state.tab==='saved'?`<div class="workflow-actions"><a href="#teams">${tr("Сохранённые команды","Saved teams")} ↗</a></div>`:''}<section class="catalog" id="catalog">
+    ${state.tab==='saved'?recentProfilesMarkup():''}${state.tab==='saved'?`<div class="workflow-actions"><a href="#teams">${tr("Сохранённые команды","Saved teams")} ↗</a></div>`:''}<section class="catalog" id="catalog">
+      ${state.tab==='search'?searchShortcutsMarkup():''}
       <div class="catalog-search">
         <input id="query" aria-label="${tr("Поиск по профилям","Search profiles")}" placeholder="${tr("Имя, юзернейм или жанр…","Name, username or genre…")}" value="${esc(state.query)}">
         <button id="filter-toggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="catalog-filters"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--surface,#fff)"/><circle cx="15" cy="17" r="3" fill="var(--surface,#fff)"/></svg><span>${tr("Фильтры","Filters")}</span><span id="filter-count" hidden></span></button>
       </div>
+      <div id="active-search-filters" class="active-search-filters" aria-label="${tr('Выбранные фильтры','Active filters')}"></div>
       <section id="catalog-filters" class="catalog-filter-panel" hidden aria-label="${tr("Фильтры поиска","Search filters")}">
       <div class="toolbar">
         <div class="tabs">
@@ -398,12 +401,14 @@ document.getElementById("reset").addEventListener("click", () => {
     render();
   });
 
+  bindRecentProfiles();
   renderCards();
 }
 
 function renderCards(skipTeams = false) {
   const target = document.getElementById("cards");
   if (!target) return;
+  activeSearchFilters();
 
 
 const activeFilterCount=[state.role!=="Все",Boolean(state.city),state.genre!=="Все жанры",state.type!=="Любые условия",Boolean(state.gender),state.ageMin!=="",state.ageMax!==""].filter(Boolean).length;
@@ -416,7 +421,7 @@ const minAge=state.ageMin==='' ? 18 : Number(state.ageMin), maxAge=state.ageMax=
 const invalidAge=!Number.isInteger(minAge)||!Number.isInteger(maxAge)||minAge<18||maxAge>100||minAge>maxAge;
 document.getElementById('age-error').textContent=invalidAge ? tr('Укажи возраст от 18 до 100 лет. Нижняя граница не должна быть больше верхней.','Enter ages from 18 to 100. The minimum must not exceed the maximum.') : '';
 
-document.querySelector(".demo-banner").textContent = (state.profile?.image && (isOrganization(state.profile.role) || state.profile.age >= 18) ? "Твой локальный профиль и демонстрационные профили. " : "Демонстрационные профили. ") + "TFP — совместная съёмка в обмен на фотографии.";
+document.querySelector(".catalog .demo-banner").textContent = (state.profile?.image && (isOrganization(state.profile.role) || state.profile.age >= 18) ? "Твой локальный профиль и демонстрационные профили. " : "Демонстрационные профили. ") + "TFP — совместная съёмка в обмен на фотографии.";
 const filtered = catalogPeople().filter(person => {
 
     const desiredRole = state.role;
@@ -457,7 +462,7 @@ const filtered = catalogPeople().filter(person => {
           ${state.saved.includes(person.id) ? "◆" : "◇"}
         </button>
 
-        <span class="availability">Открыт${person.role === "Модель" ? "а" : ""} к сотрудничеству</span>
+
       </div>
 
       <div class="card-info">
@@ -477,7 +482,7 @@ const filtered = catalogPeople().filter(person => {
 
         <div class="card-foot">
           <div class="tags">
-            ${person.tags.map(tag => '<span class="tag">' + tag + '</span>').join("")}
+            ${person.tags.slice(0,3).map(tag => '<span class="tag">' + tag + '</span>').join("")}
           </div>
           <span class="conditions">${person.type}</span>
         </div>
@@ -549,8 +554,16 @@ document.addEventListener("keydown",event => {
 
   if (event.key === "Tab") {
     const items = Array.from(modal.querySelectorAll(
-      'button,input,select,textarea,a[href],[tabindex="0"]'
-    )).filter(element => !element.disabled);
+      'button,input,select,textarea,a[href],summary,[tabindex]'
+    )).filter(element => {
+      if (element.disabled || (element.tabIndex < 0 && !(element.tagName === 'SUMMARY' && !element.hasAttribute('tabindex'))) || !element.getClientRects().length || getComputedStyle(element).visibility === 'hidden' || element.closest('[inert]')) return false;
+      for (let parent = element.parentElement; parent && parent !== modal; parent = parent.parentElement) {
+        if (parent.tagName === 'DETAILS' && !parent.open && !parent.querySelector(':scope > summary')?.contains(element)) return false;
+      }
+      return true;
+    });
+
+    if (!items.length) { event.preventDefault(); modal.tabIndex = -1; modal.focus(); return; }
 
     const first = items[0];
     const last = items[items.length-1];
@@ -573,6 +586,7 @@ function bindPortfolioPreview(root,projects,returnTo) {
 }
 
 function openPerson(id) {
+  rememberProfile(id);
   const person = catalogPeople().find(item => item.id === id);
   if (!person) return;
 
@@ -596,7 +610,8 @@ function openPerson(id) {
       ${portfolioPreview(person.id === 0 ? portfolio : (person.projects || []))}
     </section>`);
 
-  if(person.id!==0){const button=document.createElement('button');button.type='button';button.className='ui-secondary propose-shoot-button';button.textContent=tr('Предложить съёмку','Propose a shoot');button.onclick=()=>openShootProposal(person.id);document.querySelector('.preview-actions').append(button);}
+  if(person.id!==0){const button=document.createElement('button');button.type='button';button.className='primary propose-shoot-button';button.textContent=tr('Предложить съёмку','Propose a shoot');button.onclick=()=>openShootProposal(person.id);document.querySelector('.preview-actions').append(button);}
+  if(person.id!==0)document.getElementById('start-chat').className='ui-secondary';
   bindReportButtons(document.getElementById('modal-root'));
   bindPortfolioPreview(document.getElementById('modal-root'),person.id === 0 ? portfolio : (person.projects || []),()=>openPerson(id));
   document.getElementById("start-chat").addEventListener("click", () => {
@@ -711,6 +726,7 @@ function openProfile() {
       <small>Профиль появится в каталоге только в этом браузере. Другие люди его пока не видят.</small>
     </form>`);
   const form = document.getElementById("profile-form");
+  form.dataset.draftContext="own-profile";
   bindRegistrationOptions(form);
   function updateProfileFields() {
     const organization = isOrganization(form.elements.role.value);
@@ -870,6 +886,7 @@ form.elements.age.required = !organization;
     } catch {
       error.textContent = "Не удалось сохранить профиль: хранилище браузера недоступно или заполнено. Попробуй фото меньшего размера."; return;
     }
+    clearFormDraft(form);
     state.profile = next;
     Object.assign(state,{role:"Все",city:"",gender:"",ageMin:"",ageMax:"",genre:"Все жанры",type:"Любые условия",query:""});
     closeModal();
@@ -990,7 +1007,8 @@ function renderChat() {
   chatMediaCleanup=()=>{disposed=true;if(recorder&&recorder.state!=='inactive'){recorder.onstop=null;recorder.stop();}stopTracks();urls.forEach(url=>URL.revokeObjectURL(url));urls.clear();};
   markConversationRead(person.id);
   const messages=conversationMessages(person.id);
-  target.innerHTML=`<div class="chat-header"><strong data-user-content>${esc(person.name)}</strong><small>${person.role} · ${esc(person.city)}</small><button type="button" id="block-chat-person">${tr("Заблокировать","Block")}</button><button type="button" id="demo-read" class="demo-read">${tr("Демо: отметить прочитанными","Demo: mark as read")}</button></div>
+  target.innerHTML=`<div class="chat-header"><a class="chat-person-link" href="#user/${encodeURIComponent(personUsername(person))}"><img src="${esc(person.image)}" alt=""><strong data-user-content>${esc(person.name)}</strong></a><small>${person.role} · ${esc(person.city)}</small><details class="chat-tools"><summary>${tr('Действия','Actions')}</summary><button type="button" id="block-chat-person">${tr("Заблокировать","Block")}</button><button type="button" id="demo-read" class="demo-read">${tr("Демо: отметить прочитанными","Demo: mark as read")}</button></details></div>
+    ${chatShootSummary(person.id)}
     <div class="messages" id="message-list"><p class="chat-notice">${tr('Демо-диалог. Сообщения и вложения сохраняются только в этом браузере и не отправляются другим людям.','Demo chat. Messages and attachments are stored only in this browser and are not sent to other people.')}</p>
     ${messages.map((message,i)=>`<div class="bubble ${message.direction==="incoming"?"incoming":""}">${message.attachment ? `<div data-attachment="${i}" class="chat-attachment">${tr('Загрузка вложения…','Loading attachment…')}</div>` : ''}${message.shootId?shootCardMarkup(ShootRepository.get(message.shootId),true):''}${message.proposal?proposalCard(message.proposal):''}${message.text&&!message.proposal&&!message.shootId?`<div data-user-content>${esc(message.text)}</div>`:''}<small class="message-meta">${message.direction==="incoming"?`<button type="button" data-report-message="${i}" aria-label="${tr('Пожаловаться на сообщение','Report message')}">⚑</button>`:''}${esc(message.time)}${message.direction==="incoming"||message.shootId?"":messageStatus(message.status === "read" ? "read" : "sent")}</small></div>`).join('')}</div>
     <div id="chat-draft" class="chat-draft" hidden></div><p id="chat-media-status" class="chat-media-status" role="status"></p>
@@ -1111,6 +1129,7 @@ list.append(pendingBubble);list.scrollTop=list.scrollHeight;
       if(draft){attachment='chat-'+crypto.randomUUID();await chatAttachmentStore(attachment,draft.blob);message.attachment=attachment;message.kind=draft.kind;}
       const next={...state.messages,[person.id]:[...(state.messages[person.id]||[]),message]};
       localStorage.setItem('kadr-html-messages',JSON.stringify(next));state.messages=next;
+      clearFormDraft(input.form);
       if(!disposed){refreshContactRows();renderShell();renderChat();document.getElementById('message-input').focus();}
     }catch{
       if(attachment)try{await chatAttachmentStore(attachment,null);}catch{}
@@ -1128,8 +1147,8 @@ if (!["light","dark"].includes(settings.theme)) settings.theme = "light";
 if (!["ru","en"].includes(settings.language)) settings.language = "ru";
 
 const tr = (ru,en) => settings.language === "en" ? en : ru;
-const routes = ["locations","statistics","safety","groups","boards","teams","shoots","membership","reminders","casting","calendar","home","search","messages","profile","portfolio","saved","likes","settings"];
-const labels = () => ({locations:tr("Студии и локации","Studios and locations"),statistics:tr("Статистика","Statistics"),safety:tr("Безопасность","Safety"),groups:tr("Групповые чаты","Group chats"),boards:tr("Мудборды","Moodboards"),teams:tr("Сохранённые команды","Saved teams"),shoots:tr("Мои съёмки","My shoots"),membership:tr("ВКадре Pro","ВКадре Pro"),reminders:tr("Напоминания","Reminders"),casting:tr("Поиск команды","Find a team"),calendar:tr("Календарь съёмок","Shoot calendar"),user:tr("Профиль пользователя","User profile"),home:tr("Главная","Home"),search:tr("Найти своих","Find your people"),messages:tr("Чаты","Chats"),profile:tr("Профиль","Profile"),portfolio:tr("Портфолио","Portfolio"),saved:tr("Избранное","Saved"),likes:tr("Симпатии","Likes"),settings:tr("Настройки","Settings")});
+const routes = ["more","locations","statistics","safety","groups","boards","teams","shoots","membership","reminders","casting","calendar","home","search","messages","profile","portfolio","saved","likes","settings"];
+const labels = () => ({more:tr("Ещё","More"),locations:tr("Студии и локации","Studios and locations"),statistics:tr("Статистика","Statistics"),safety:tr("Безопасность","Safety"),groups:tr("Групповые чаты","Group chats"),boards:tr("Мудборды","Moodboards"),teams:tr("Сохранённые команды","Saved teams"),shoots:tr("Мои съёмки","My shoots"),membership:tr("ВКадре Pro","ВКадре Pro"),reminders:tr("Уведомления","Notifications"),casting:tr("Поиск команды","Find a team"),calendar:tr("Календарь съёмок","Shoot calendar"),user:tr("Профиль пользователя","User profile"),home:tr("Главная","Home"),search:tr("Найти своих","Find your people"),messages:tr("Чаты","Chats"),profile:tr("Профиль","Profile"),portfolio:tr("Портфолио","Portfolio"),saved:tr("Избранное","Saved"),likes:tr("Симпатии","Likes"),settings:tr("Настройки","Settings")});
 function applySettings() {
   document.documentElement.dataset.theme = settings.theme;
   document.documentElement.dataset.palette = settings.palette;
@@ -1142,9 +1161,9 @@ function pageIntro(title,description,back=false) {
 function renderShell() {
   updateReminderBadge();
   const names = labels();
-  const active = ["portfolio","saved","likes","calendar","membership","shoots","groups","boards","teams","locations","statistics","safety"].includes(state.tab) ? "profile" : state.tab;
-  document.querySelector("nav").innerHTML = ["search","casting","messages","profile"].map(id => `<a href="#${id}" aria-label="${names[id]}" title="${names[id]}" class="${active === id ? "active" : ""}" ${active === id ? 'aria-current="page"' : ""}><span class="nav-message-icon" aria-hidden="true">${interfaceIcon(id)}${id==="messages"&&hasAnyUnread()?'<i class="nav-unread-dot"></i>':""}</span><span class="nav-label">${id==='search'?tr('Люди','People'):id==='casting'?tr('Команда','Team'):names[id]}</span>${id==="messages"&&hasAnyUnread()?`<span class="sr-only">${tr("Есть непрочитанные сообщения","Unread messages")}</span>`:""}</a>`).join("");
-const nested = ["portfolio","saved","likes","calendar","membership","shoots","groups","boards","teams","locations","statistics","safety"].includes(state.tab);
+  const active = state.tab === "portfolio" ? "profile" : state.tab;
+  document.querySelector("nav").innerHTML = mainNavigationMarkup();
+const nested = ["portfolio","likes","statistics","safety"].includes(state.tab);
 const breadcrumbs = document.querySelector(".breadcrumbs");
 breadcrumbs.setAttribute("aria-label",tr("Навигация по разделам","Section navigation"));
 breadcrumbs.innerHTML = `<a href="#home">${tr("Сообщество","Community")}</a><span aria-hidden="true"> / </span>${nested ? `<a href="#profile">${names.profile}</a><span aria-hidden="true"> / </span>` : ""}<a id="current-tab" href="${state.tab === "user" ? esc(location.hash) : "#"+state.tab}" aria-current="page">${names[state.tab]}</a>`;
@@ -1183,9 +1202,14 @@ function renderHome() {
 function renderProfilePage() {
   const p = state.profile;
   document.getElementById("content").innerHTML = pageIntro(tr("Твоё пространство","Your space"),tr("Профиль, работы и люди, которых хочется сохранить.","Your profile, your work and people worth remembering.")) + `
-  <section class="surface profile-summary">${p?.image ? `<img class="profile-avatar" src="${esc(p.image)}" alt="${tr("Фото профиля","Profile photo")}">` : `<div class="avatar-placeholder" aria-hidden="true">${interfaceIcon('profile')}</div>`}<div><span class="eyebrow">${tr("МОЙ ПРОФИЛЬ","MY PROFILE")}</span><h2 data-user-content>${esc(p?.name || tr("Давай знакомиться","Let's meet"))}${p?.age && !isOrganization(p.role) ? `, ${p.age}` : ""}</h2><p>${p ? `${esc(p.role)}${p.city ? ` · ${esc(p.city)}` : ""}` : tr("Расскажи о себе, чтобы найти свою команду.","Introduce yourself to find your team.")}</p><p data-user-content>${esc(p?.bio || "")}</p>${profileSocialLinks()}${p ? profileIdentity({...p,id:0}) : ""}<button class="primary" id="edit-profile">${p ? tr("Редактировать профиль","Edit profile") : tr("Создать профиль","Create profile")}</button></div></section>
-  ${profileToolsMarkup()}${verificationMarkup()}${availabilityMarkup(0)}${reviewsMarkup(0)}${portfolioPreview(portfolio)}<div class="info-grid profile-links"><a class="surface" href="#portfolio"><span class="eyebrow">${portfolio.length} / 10 ${tr("проектов","projects")}</span><h3>${tr("Портфолио ↗","Portfolio ↗")}</h3><p>${tr("До 10 проектов, по 8 фотографий в каждом.","Up to 10 projects with 8 photos each.")}</p></a><a class="surface" href="#saved"><span class="eyebrow">${state.saved.length}</span><h3>${tr("Избранное ◇","Saved ◇")}</h3><p>${tr("Профили, к которым хочется вернуться.","Profiles you want to revisit.")}</p></a><a class="surface" href="#likes"><span class="eyebrow">${state.likes.length}</span><h3>${tr("Симпатии ♡","Likes ♡")}</h3><p>${tr("Люди, которым ты поставил лайк.","People you have liked.")}</p></a></div>
+  <section id="profile-about" class="surface profile-summary">${p?.image ? `<img class="profile-avatar" src="${esc(p.image)}" alt="${tr("Фото профиля","Profile photo")}">` : `<div class="avatar-placeholder" aria-hidden="true">${interfaceIcon('profile')}</div>`}<div><span class="eyebrow">${tr("МОЙ ПРОФИЛЬ","MY PROFILE")}</span><h2 data-user-content>${esc(p?.name || tr("Давай знакомиться","Let's meet"))}${p?.age && !isOrganization(p.role) ? `, ${p.age}` : ""}</h2><p>${p ? `${esc(p.role)}${p.city ? ` · ${esc(p.city)}` : ""}` : tr("Расскажи о себе, чтобы найти свою команду.","Introduce yourself to find your team.")}</p><p data-user-content>${esc(p?.bio || "")}</p>${profileSocialLinks()}${p ? profileIdentity({...p,id:0}) : ""}<button class="primary" id="edit-profile">${p ? tr("Редактировать профиль","Edit profile") : tr("Создать профиль","Create profile")}</button></div></section>
+  ${profileSectionLinks(true)}
+  <section id="profile-work"><div class="section-heading"><h2>${tr('Портфолио','Portfolio')}</h2><a href="#portfolio">${tr('Управлять работами →','Manage work →')}</a></div>${portfolioPreview(portfolio)}</section>
+  <section id="profile-schedule"><h2>${tr('Съёмки и доступность','Shoots and availability')}</h2><div class="workflow-actions"><a class="ui-secondary" href="#shoots">${tr('Мои съёмки','My shoots')}</a><a class="ui-secondary" href="#calendar">${tr('Календарь','Calendar')}</a></div>${availabilityMarkup(0)}</section>
+  <section id="profile-reviews">${reviewsMarkup(0)}</section>
+  <details class="surface profile-management"><summary>${tr('Управление профилем и верификация','Profile management and verification')}</summary>${verificationMarkup()}<div class="workflow-actions"><a href="#settings">${tr('Настройки','Settings')}</a><a href="#safety">${tr('Безопасность','Safety')}</a><a href="#statistics">${tr('Статистика','Statistics')}</a><a href="#more">${tr('Все инструменты','All tools')} ↗</a></div></details>
   <p class="demo-banner">${tr("Профиль и портфолио пока доступны только в этом браузере.","Your profile and portfolio are currently available only in this browser.")}</p>`;
+  bindProfileSections(document.getElementById('content'));
   bindPortfolioPreview(document.getElementById('content'),portfolio,()=>{});
   bindWorkReviews(document.getElementById("content"));
   bindVerification(document.getElementById("content"));
@@ -1271,11 +1295,12 @@ function renderPortfolio() {
     document.getElementById('new-project').onsubmit = async event => {
       event.preventDefault();
       if(disabled || portfolio.length>=10) return;
-      const input = event.currentTarget.elements.name;
+      const draftForm=event.currentTarget;
+      const input = draftForm.elements.name;
       const name = input.value.trim();
       if(!name) { input.setCustomValidity(tr('Введи название проекта.','Enter a project name.')); input.reportValidity(); return; }
       const item = {id:crypto.randomUUID(),name,photos:[]};
-      if(await updatePortfolio([...portfolio,item])) { selectedProject=item.id; if(state.tab==='portfolio') renderPortfolio(); }
+      if(await updatePortfolio([...portfolio,item])) { clearFormDraft(draftForm); selectedProject=item.id; if(state.tab==='portfolio') renderPortfolio(); }
     };
     document.getElementById('new-project').oninput = event => event.target.setCustomValidity('');
     content.querySelectorAll('[data-project]').forEach(button => button.onclick = () => {selectedProject=button.dataset.project;renderPortfolio();});
@@ -1294,9 +1319,10 @@ function renderPortfolio() {
   document.getElementById('rename-project').oninput = event => event.target.setCustomValidity('');
   document.getElementById('rename-project').onsubmit = async event => {
     event.preventDefault();
-    const input=event.currentTarget.elements.name,name=input.value.trim();
+    const draftForm=event.currentTarget;
+    const input=draftForm.elements.name,name=input.value.trim();
     if(!name) { input.setCustomValidity(tr('Введи название проекта.','Enter a project name.'));input.reportValidity();return; }
-    if(await updatePortfolio(replace({...project,name}))) toast(tr('Название сохранено','Name saved'));
+    if(await updatePortfolio(replace({...project,name}))) {clearFormDraft(draftForm);toast(tr('Название сохранено','Name saved'));}
   };
   document.getElementById('delete-project').onclick = () => {
     showModal(`<section class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-title"><button class="close" aria-label="${tr('Закрыть','Close')}">×</button><h2 id="delete-title">${tr('Удалить проект?','Delete project?')}</h2><p>${tr('Подборка и все фотографии в ней будут удалены из портфолио.','The project and all its photos will be removed from your portfolio.')}</p><button class="primary" id="confirm-project-delete">${tr('Удалить','Delete')}</button></section>`);
@@ -1406,6 +1432,7 @@ function renderSettings() {
       status.textContent = tr("Не удалось сохранить ссылки. Проверь доступ к хранилищу браузера.","Could not save links. Check browser storage access.");
       return;
     }
+    clearFormDraft(form);
     settings.socials = socials;
     status.textContent = tr("Соцсети сохранены и отображаются в твоём профиле.","Social links saved and displayed on your profile.");
   };
@@ -1446,17 +1473,20 @@ function renderUserPage() {
   const person=catalogPeople().find(p=>personUsername(p)===username);
   const content=document.getElementById("content");
   if (!person) {content.innerHTML=pageIntro(tr("Профиль не найден","Profile not found"),tr("Проверь адрес или вернись к поиску.","Check the address or return to search."))+'<a class="primary" href="#search">'+tr("К поиску","Back to search")+'</a>';return;}
+  rememberProfile(person.id);
   const projects=person.id===0?portfolio:(person.projects||[]);
   content.innerHTML=`<a class="back-link" href="#search">← ${tr("К поиску","Back to search")}</a>
-  <section class="surface full-profile"><img class="full-profile-photo" src="${esc(person.image)}" alt="${esc(person.name)}">
+  <section id="profile-about" class="surface full-profile"><img class="full-profile-photo" src="${esc(person.image)}" alt="${esc(person.name)}">
   <div><span class="eyebrow">${esc(person.role)} · ${esc(person.city)}</span><h1 data-user-content>${esc(person.name)}</h1>
   ${profileIdentity(person)}<p data-user-content>${esc(person.bio||"")}</p><div class="tags">${[...person.tags,person.type].map(tag=>`<span class="tag">${esc(tag)}</span>`).join("")}</div>
-  ${person.id===0?profileSocialLinks():""}<div class="profile-actions"><button class="primary" id="user-contact">${person.id===0?tr("Редактировать профиль","Edit profile"):tr("Обсудить съёмку","Discuss a shoot")}</button>${reportButton(person)}</div>
+  ${person.id===0?profileSocialLinks():""}<div class="profile-actions"><button class="primary" id="user-contact">${person.id===0?tr("Редактировать профиль","Edit profile"):tr("Написать","Message")}</button>${reportButton(person)}</div>
   <small>${person.id===0?tr("Профиль доступен только в этом браузере.","Profile is available only in this browser."):tr("Демонстрационный профиль. Фотографии — иллюстрации.","Demo profile. Photos are illustrations.")}</small></div></section>
-  ${availabilityMarkup(person.id)}${reviewsMarkup(person.id)}<h2>${tr("Портфолио","Portfolio")}</h2>${portfolioPreview(projects)}`;
+  ${profileSectionLinks()}<section id="profile-work"><h2>${tr("Портфолио","Portfolio")}</h2>${portfolioPreview(projects)}</section><section id="profile-schedule"><h2>${tr('Доступность для съёмок','Shoot availability')}</h2>${availabilityMarkup(person.id)}</section><section id="profile-reviews">${reviewsMarkup(person.id)}</section>`;
+  bindProfileSections(content);
   bindAvailability(content,renderUserPage);
   bindWorkReviews(content);
-  if(person.id!==0){const button=document.createElement('button');button.type='button';button.className='ui-secondary propose-shoot-button';button.textContent=tr('Предложить съёмку','Propose a shoot');button.onclick=()=>openShootProposal(person.id);content.querySelector('.profile-actions').prepend(button);}
+  if(person.id!==0){const button=document.createElement('button');button.type='button';button.className='primary propose-shoot-button';button.textContent=tr('Предложить съёмку','Propose a shoot');button.onclick=()=>openShootProposal(person.id);content.querySelector('.profile-actions').prepend(button);}
+  if(person.id!==0)document.getElementById('user-contact').className='ui-secondary';
   bindReportButtons(content);
   bindPortfolioPreview(content,projects,()=>{closeModal();renderUserPage();});
   document.getElementById("user-contact").onclick=()=>{if(person.id===0)openProfile();else{state.chat=person.id;selectTab("messages");}};
@@ -1489,7 +1519,7 @@ function setupSettingsSections() {
     const message=String(new FormData(event.currentTarget).get("message")).trim();
     if(!message)return;
     const blob=new Blob(["ВКадре — обращение в поддержку\n"+new Date().toISOString()+"\n\n"+message],{type:"text/plain;charset=utf-8"});
-    const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="vkadre-support.txt";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="vkadre-support.txt";link.click();clearFormDraft(event.currentTarget);setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
 }
 

@@ -64,14 +64,16 @@ function openPlanning(personId,id) {
   root.querySelectorAll('[data-task-remove]').forEach(b=>b.onclick=()=>mutate(current=>({...current,tasks:(current.tasks||[]).filter(task=>task.id!==b.dataset.taskRemove)})));
   root.querySelectorAll('[data-remove-reference]').forEach(b=>b.onclick=()=>mutate(current=>({...current,references:(current.references||[]).filter(ref=>ref.id!==b.dataset.removeReference)})));
   const taskForm=root.querySelector('#task-form');
-  if(taskForm)taskForm.onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(taskForm));if(!data.title.trim()||!data.owner.trim()){root.querySelector('#planning-error').textContent=tr('Укажи задачу и ответственного.','Enter the task and its owner.');return;}if((proposalById(personId,id)?.tasks||[]).length>=40){root.querySelector('#planning-error').textContent=tr('Не больше 40 задач на съёмку.','Up to 40 tasks per shoot.');return;}mutate(current=>({...current,tasks:[...(current.tasks||[]),{id:workflowId(),title:data.title.trim(),owner:data.owner.trim(),done:false}]}));};
+  if(taskForm)taskForm.dataset.draftContext='task:'+personId+':'+id;
+  if(taskForm)taskForm.onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(taskForm));if(!data.title.trim()||!data.owner.trim()){root.querySelector('#planning-error').textContent=tr('Укажи задачу и ответственного.','Enter the task and its owner.');return;}if((proposalById(personId,id)?.tasks||[]).length>=40){root.querySelector('#planning-error').textContent=tr('Не больше 40 задач на съёмку.','Up to 40 tasks per shoot.');return;}if(mutate(current=>({...current,tasks:[...(current.tasks||[]),{id:workflowId(),title:data.title.trim(),owner:data.owner.trim(),done:false}]})))clearFormDraft(taskForm);};
   const referenceForm=root.querySelector('#reference-form');
+  if(referenceForm)referenceForm.dataset.draftContext='reference:'+personId+':'+id;
   if(referenceForm)referenceForm.onsubmit=async e=>{e.preventDefault();const data=new FormData(referenceForm),file=data.get('image'),url=String(data.get('url')).trim(),title=String(data.get('title')).trim(),error=root.querySelector('#planning-error');
     if(!title){error.textContent=tr('Добавь подпись.','Add a caption.');return;}
     if((proposalById(personId,id)?.references||[]).length>=8){error.textContent=tr('Не больше 8 референсов на съёмку.','Up to 8 references per shoot.');return;}
     if((!file?.size&&!url)||(url&&!safeReferenceUrl(url))){error.textContent=tr('Выбери изображение или укажи ссылку http/https.','Choose an image or enter an http/https link.');return;}
     const button=referenceForm.querySelector('[type="submit"]');button.disabled=true;error.textContent=tr('Сохраняем…','Saving…');
-    try { const ref={id:workflowId(),title,url:url?safeReferenceUrl(url):null,image:file?.size?await compressReference(file):null};if(!referenceForm.isConnected)return;mutate(current=>({...current,references:[...(current.references||[]),ref]})); }
+    try { const ref={id:workflowId(),title,url:url?safeReferenceUrl(url):null,image:file?.size?await compressReference(file):null};if(!referenceForm.isConnected)return;if(mutate(current=>({...current,references:[...(current.references||[]),ref]})))clearFormDraft(referenceForm); }
     catch(err){if(error.isConnected)error.textContent=err.message;}
     finally{if(button.isConnected){button.disabled=false;if(error.textContent===tr('Сохраняем…','Saving…'))error.textContent='';}}
   };
@@ -91,16 +93,18 @@ function collectReminders(now=Date.now()) {
   for(const shoot of savedShoots()) {
     const time=new Date(shoot.date+'T'+shoot.time).getTime();
     scheduled.add(shoot.id);
-    if(time>=now&&time<=now+86400000)reminders.push({id:'shoot:'+shoot.id+':'+shoot.date+':'+shoot.time,title:shoot.title,text:tr('Съёмка в ближайшие 24 часа','Shoot within the next 24 hours')+' · '+shoot.date+' '+shoot.time,date:shoot.date,kind:'calendar'});
+    if(time>=now&&time<=now+86400000)reminders.push({id:'shoot:'+shoot.id+':'+shoot.date+':'+shoot.time,title:shoot.title,text:tr('Съёмка в ближайшие 24 часа','Shoot within the next 24 hours')+' · '+shoot.date+' '+shoot.time,date:shoot.date,kind:'calendar',category:'shoots'});
   }
   for(const [personId,messages] of Object.entries(state.messages)) for(const message of messages) {
     const p=message.proposal;if(!p||p.status==='cancelled')continue;
     const time=new Date(p.date+'T'+p.time).getTime();
-    if(p.status==='agreed'&&!scheduled.has('agreement-'+p.id)&&time>=now&&time<=now+86400000)reminders.push({id:'agreement:'+p.id+':'+p.date+':'+p.time,title:p.title,text:tr('Съёмка скоро — добавь её в календарь','Shoot coming up — add it to the calendar'),personId:Number(personId),kind:'chat'});
+    if(p.status==='agreed'&&!scheduled.has('agreement-'+p.id)&&time>=now&&time<=now+86400000)reminders.push({id:'agreement:'+p.id+':'+p.date+':'+p.time,title:p.title,text:tr('Съёмка скоро — добавь её в календарь','Shoot coming up — add it to the calendar'),personId:Number(personId),kind:'chat',category:'shoots'});
   }
+  if(typeof collectActivityNotifications==='function')reminders.push(...collectActivityNotifications());
   return reminders;
 }
 function renderReminders() {
+  if(typeof renderNotificationCenter==='function'){renderNotificationCenter();return;}
   const reminders=collectReminders(),dismissed=workflowList('dismissed-reminders'),visible=reminders.filter(r=>r.persistent||!dismissed.includes(r.id));
   const content=document.getElementById('content');
   content.innerHTML=pageIntro(tr('Напоминания','Reminders'),tr('Ближайшие съёмки и важные даты.','Upcoming shoots and important dates.'))+`<p class="demo-banner">${tr('Напоминания проверяются при открытии сайта и раз в минуту, пока он открыт. Время — по часам этого устройства. В закрытом браузере уведомления не отправляются.','Reminders are checked when you open the site and every minute while it is open. Times use this device’s clock. No notifications are sent while the browser is closed.')}</p><div class="reminder-list">${visible.length?visible.map(r=>`<article class="surface"><span class="eyebrow">${esc(r.text)}</span><h2>${esc(r.title)}</h2><div class="workflow-actions"><button class="primary" data-open-reminder="${esc(r.id)}">${r.kind==='verification'?tr('Перейти к верификации','Verify profile'):r.kind==='calendar'?tr('В календарь','Open calendar'):tr('Открыть чат','Open chat')}</button>${r.persistent?'':`<button data-dismiss-reminder="${esc(r.id)}">${tr('Скрыть','Dismiss')}</button>`}</div></article>`).join(''):`<section class="surface"><h2>${tr('Всё спокойно','All caught up')}</h2><p>${tr('Здесь появятся съёмки на ближайшие 24 часа. Добавить съёмку можно в календаре твоего профиля.','Shoots within the next 24 hours will appear here. Add a shoot in the calendar in your profile.')}</p></section>`}</div>${dismissed.length?`<button id="restore-reminders">${tr('Вернуть скрытые напоминания','Restore dismissed reminders')}</button>`:''}`;
@@ -110,7 +114,7 @@ function renderReminders() {
 }
 function updateReminderBadge() {
   const link=document.getElementById('reminders-link');if(!link)return;
-  const dismissed=workflowList('dismissed-reminders'),count=collectReminders().filter(r=>r.persistent||!dismissed.includes(r.id)).length;
+  const dismissed=workflowList('dismissed-reminders'),count=collectReminders().filter(r=>r.persistent||(!dismissed.includes(r.id)&&(typeof notificationRead!=='function'||!notificationRead(r)))).length;
   link.innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>${count?`<span class="reminder-count">${count}</span>`:''}`;
-  link.setAttribute('aria-label',tr('Напоминания','Reminders')+(count?': '+count:''));link.title=tr('Напоминания','Reminders');
+  link.setAttribute('aria-label',tr('Уведомления','Notifications')+(count?': '+count:''));link.title=tr('Уведомления','Notifications');
 }

@@ -1,0 +1,20 @@
+"use strict";
+function recentlyViewed(){const ids=read('recent-profiles-v1',[]);return Array.isArray(ids)?ids.filter(Number.isInteger).filter(id=>id!==0&&!SafetyStore.blocked(id)).slice(0,8):[];}
+function rememberProfile(id){if(!id||SafetyStore.blocked(id))return;try{localStorage.setItem('kadr-html-recent-profiles-v1',JSON.stringify([id,...recentlyViewed().filter(x=>x!==id)].slice(0,8)));}catch{}}
+function recentProfilesMarkup(){const profiles=recentlyViewed().map(id=>catalogPeople().find(p=>p.id===id)).filter(Boolean);if(!profiles.length)return '';return `<section class="recent-profiles"><div class="section-heading"><h2>${tr('Недавно смотрели','Recently viewed')}</h2><button id="clear-recent" class="ui-secondary">${tr('Очистить историю','Clear history')}</button></div><p class="demo-banner">${tr('История только на этом устройстве.','History stays on this device.')}</p><div class="recent-list">${profiles.map(p=>`<a href="#user/${encodeURIComponent(personUsername(p))}"><img src="${esc(p.image)}" alt="" loading="lazy"><span data-user-content>${esc(p.name)}<small>${esc(p.role)}</small></span></a>`).join('')}</div></section>`;}
+function bindRecentProfiles(){document.getElementById('clear-recent')?.addEventListener('click',()=>{if(workflowSave('recent-profiles-v1',[]))render();});}
+function bindCastingDraft(form,rows,addRole,payment){
+  const key='kadr-html-casting-draft-v1';let usedRaw=null;
+  const panel=document.createElement('details');panel.className='casting-draft-panel';
+  panel.innerHTML=`<summary>${tr('Ручная копия текста','Manual text copy')}</summary><p>${tr('Можно сохранить незавершённый текст и роли. Фотографии в этот черновик не входят — их нужно будет добавить заново.','Save unfinished text and roles. Photos are not included in this draft and must be added again.')}</p><div class="workflow-actions"><button type="button" id="save-casting-draft">${tr('Сохранить текст черновика','Save text draft')}</button><button type="button" id="restore-casting-draft">${tr('Восстановить сохранённый текст','Restore saved text')}</button></div><p role="status" id="casting-draft-status"></p>`;
+  form.querySelector('h2').after(panel);
+  const restore=panel.querySelector('#restore-casting-draft'),status=panel.querySelector('[role=status]');
+  try{restore.hidden=!localStorage.getItem(key);}catch{restore.hidden=true;}
+  panel.querySelector('#save-casting-draft').onclick=()=>{
+    const fields={};for(const el of form.elements){if(el.name&&['INPUT','SELECT','TEXTAREA'].includes(el.tagName)&&el.type!=='file')fields[el.name]=el.value;}
+    const roles=[...rows.children].map(row=>({name:row.querySelector('[data-role-name]').value,count:row.querySelector('[data-role-count]').value}));
+    try{const raw=JSON.stringify({version:1,fields,roles});localStorage.setItem(key,raw);usedRaw=raw;restore.hidden=false;status.textContent=tr('Текст и роли сохранены на этом устройстве.','Text and roles saved on this device.');}catch{status.textContent=tr('Не удалось сохранить черновик. Форма остаётся открытой.','Could not save draft. The form remains open.');}
+  };
+  restore.onclick=()=>{try{const raw=localStorage.getItem(key),draft=JSON.parse(raw);if(draft?.version!==1||!draft.fields||!Array.isArray(draft.roles)||draft.roles.length>12||draft.roles.some(r=>!r||typeof r.name!=='string'||typeof r.count!=='string'))throw Error();for(const [name,value] of Object.entries(draft.fields)){const el=form.elements.namedItem(name);if(el&&typeof value==='string'&&el.type!=='file'){el.value=el.dataset.dateEntry?displayDateInput(value):value;el.dispatchEvent(new Event('input',{bubbles:true}));}}rows.replaceChildren();draft.roles.forEach(addRole);payment();usedRaw=raw;status.textContent=tr('Текст восстановлен. Проверь даты и добавь фотографии при необходимости.','Text restored. Check dates and add photos if needed.');}catch{status.textContent=tr('Черновик недоступен или повреждён. Он не удалён.','Draft is unavailable or damaged. It has not been deleted.');}};
+  return ()=>{try{if(usedRaw&&localStorage.getItem(key)===usedRaw)localStorage.removeItem(key);}catch{}};
+}

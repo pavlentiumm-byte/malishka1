@@ -1,0 +1,13 @@
+.search-shortcuts,.active-search-filters {display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.search-shortcuts button,.search-shortcuts a,.active-search-filters button {display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:13px;line-height:1.4;text-decoration:none;max-width:100%;overflow-wrap:anywhere}
+.search-shortcuts button[aria-pressed=true] {background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.active-search-filters:empty {display:none}.active-search-filters button {background:var(--soft);font-size:12px}.active-search-filters #clear-search {background:transparent}
+.profile-section-links {display:flex;flex-wrap:wrap;gap:8px;margin:22px 0;height:auto}
+.profile-section-links button,.profile-section-links a {font-size:13px;min-height:44px;padding:11px 16px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--surface)}
+#profile-work,#profile-schedule,#profile-reviews {margin:28px 0;scroll-margin-top:24px}
+#profile-about {scroll-margin-top:24px}.profile-management {margin:24px 0}.profile-management summary {cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:500}.profile-management[open] summary {margin-bottom:18px}
+.card .photo {aspect-ratio:4/5}.card .photo img {height:100%;object-fit:cover}.card-info {display:flex;flex-direction:column;flex:1}.card-info .card-foot {margin-top:auto;padding-top:14px}.card .profile-handle,.card .portfolio-count {display:none}
+@media(max-width:560px){.profile-section-links {display:flex;position:static;justify-content:flex-start;height:auto}.profile-section-links button,.profile-section-links a {flex:1 1 130px;min-width:0}.search-shortcuts button {flex:1 1 120px}.search-shortcuts a {width:100%}}
+
+.card .save,.card .heart {padding:0;display:grid;place-items:center;line-height:1;width:36px;height:36px;min-width:36px;flex-shrink:0}
+.preview-actions .propose-shoot-button {order:-1}

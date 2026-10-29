@@ -31,6 +31,7 @@ function openShootProposal(personId,id=null) {
     ${existing?.status==='confirmed'?`<p class="shoot-change-warning">${tr('Изменение условий отменит прежнее подтверждение. Съёмка вернётся на согласование и временно исчезнет из календаря до нового принятия.','Changing the terms invalidates the previous confirmation. The shoot returns to approval and leaves the calendar until accepted again.')}</p>`:''}
     <p id="shoot-proposal-error" role="alert"></p><div class="form-actions shoot-editor-actions"><button type="submit" class="primary">${existing&&existing.status!=='draft'?tr('Сохранить изменения','Save changes'):tr('Проверить предложение','Review proposal')}</button><button type="button" class="ui-secondary" id="shoot-save-draft" ${existing&&existing.status!=='draft'?'hidden':''}>${tr('Сохранить черновик','Save draft')}</button><button type="button" class="ui-secondary" id="shoot-discard-edit">${tr('Отмена','Cancel')}</button></div><small>${tr('«Отмена» закрывает форму без сохранения новых изменений. Черновики доступны в профиле → Мои съёмки.','Cancel closes the form without saving new changes. Drafts are available in Profile → My shoots.')}</small></form>`);
   const form=document.getElementById('shoot-proposal-form'),error=form.querySelector('#shoot-proposal-error');
+  form.dataset.draftContext='proposal:'+personId+':'+(id||'new');
   bindProposalAvailability(form,personId);
   const payment=()=>{const paid=form.elements.format.value==='paid';form.querySelector('#shoot-payment-fields').hidden=!paid;form.elements.amount.required=paid;form.elements.amount.disabled=!paid;};payment();form.elements.format.onchange=payment;
   form.querySelector('#shoot-discard-edit').onclick=()=>{closeModal();if(existing)openShootDetails(existing.id);};
@@ -40,7 +41,7 @@ function openShootProposal(personId,id=null) {
     const participants=creativeParticipants(form.elements.creativeTeam?.value,[{id:0,name:state.profile?.name||tr('Ты','You'),role:state.profile?.role||tr('Организатор','Organizer')},{id:person.id,name:person.name,role:data.role}]);
     const result=existing?ShootRepository.edit(existing.id,existing.rev,data):ShootRepository.create(person.id,data,participants);
     if(!result.ok){error.textContent=shootError(result);return;}
-    closeModal();refreshShootViews();openShootDetails(result.record.id);
+    clearFormDraft(form);closeModal();refreshShootViews();openShootDetails(result.record.id);
     toast(review?tr('Изменения сохранены','Changes saved'):tr('Черновик сохранён','Draft saved'));
   };
   form.onsubmit=event=>{event.preventDefault();save(true);};form.querySelector('#shoot-save-draft').onclick=()=>save(false);
@@ -85,8 +86,8 @@ function openShootDetails(id,recipientDemo=false) {
 function confirmShootAction(record,action) {
   const title=action==='complete'?tr('Завершить съёмку?','Complete this shoot?'):action==='decline'?tr('Отклонить предложение локально?','Decline this proposal locally?'):tr('Отменить съёмку?','Cancel this shoot?');
   showModal(`<form class="modal" id="shoot-confirm" role="dialog" aria-modal="true" aria-labelledby="shoot-confirm-title"><button type="button" class="close" aria-label="${tr('Закрыть','Close')}">×</button><h2 id="shoot-confirm-title">${title}</h2><p data-user-content>${esc(record.title)}</p><p>${action==='complete'?tr('После завершения условия станут доступны только для чтения. Это локальная отметка, а не подтверждение участия другими людьми.','After completion, the terms become read-only. This is a local mark, not confirmation by other participants.'):tr('Запись останется в истории. Подтверждённое событие исчезнет из календаря.','The record remains in history. The confirmed event leaves the calendar.')}</p>${action!=='complete'?`<label class="form-label">${tr('Причина','Reason')}<textarea name="reason" required maxlength="1000" rows="3"></textarea></label>`:''}<p id="shoot-confirm-error" role="alert"></p><div class="form-actions"><button type="submit" class="primary">${tr('Подтвердить','Confirm')}</button><button type="button" class="ui-secondary" id="shoot-confirm-back">${tr('Назад','Back')}</button></div></form>`);
-  const form=document.getElementById('shoot-confirm');form.querySelector('#shoot-confirm-back').onclick=()=>openShootDetails(record.id,action==='decline');
-  form.onsubmit=event=>{event.preventDefault();const result=ShootRepository.transition(record.id,record.rev,action,String(new FormData(form).get('reason')||''));if(!result.ok){form.querySelector('#shoot-confirm-error').textContent=shootError(result);return;}closeModal();refreshShootViews();openShootDetails(record.id);};
+  const form=document.getElementById('shoot-confirm');form.dataset.draftContext='confirm:'+record.id+':'+action;form.querySelector('#shoot-confirm-back').onclick=()=>openShootDetails(record.id,action==='decline');
+  form.onsubmit=event=>{event.preventDefault();const result=ShootRepository.transition(record.id,record.rev,action,String(new FormData(form).get('reason')||''));if(!result.ok){form.querySelector('#shoot-confirm-error').textContent=shootError(result);return;}clearFormDraft(form);closeModal();refreshShootViews();openShootDetails(record.id);};
 }
 function bindShootCards(root) { root.querySelectorAll('[data-shoot-open]').forEach(button=>button.onclick=()=>openShootDetails(button.dataset.shootOpen)); }
 function refreshShootViews() {

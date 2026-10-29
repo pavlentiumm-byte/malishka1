@@ -2,6 +2,8 @@
 
 function interfaceIcon(name) {
   const paths={
+    home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
+    more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
     search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/>',
     casting:'<rect x="3" y="6" width="18" height="15" rx="3"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v3h4v-3"/>',
     messages:'<path d="M12 3C7.03 3 3 6.81 3 11.5c0 1.65.48 3.19 1.31 4.49L3 21l5.28-1.76A9.49 9.49 0 0 0 12 20c4.97 0 9-3.81 9-8.5S16.97 3 12 3Z"/><path d="M7 9h9M7 13h6"/>',
@@ -43,6 +45,7 @@ function renderMembership() {
 // Keep original input nodes and their change handlers: cropping/upload logic stays intact.
 function enhanceFileInputs(root=document) {
   enhanceDateInputs(root);
+  if(typeof enhanceFormDrafts==='function')enhanceFormDrafts(root);
   root.querySelectorAll('input[type="file"]:not([hidden])').forEach(input=>{
     if(input.dataset.fileEnhanced)return;
     input.dataset.fileEnhanced='true';

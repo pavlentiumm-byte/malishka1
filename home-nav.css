@@ -1,0 +1,38 @@
+body>aside>.nav-title,body>aside>.side-note {display:none}
+body>aside>nav {gap:5px}
+.nav-group-label {font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:22px 12px 8px}
+.home-lead {display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:center;gap:28px;background:var(--hero-bg);color:var(--hero-ink);padding:36px;border-radius:22px;margin:24px 0}
+.home-lead .eyebrow,.home-lead p {color:var(--hero-muted)}
+.home-lead h1 {font-size:clamp(32px,4vw,56px);line-height:1.08;letter-spacing:-.04em;margin:22px 0}
+.home-lead p {font-size:15px;line-height:1.65;max-width:460px}
+.home-actions {display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.home-lead .primary {background:var(--hero-ink);color:var(--hero-bg)}
+.home-lead .ui-secondary {background:transparent;color:var(--hero-ink);border-color:#ffffff70}
+.home-visual {display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center}
+.home-visual img {width:100%;height:240px;object-fit:cover;border-radius:70px 70px 14px 14px}
+.home-visual img:last-child {height:200px;border-radius:14px 14px 70px 70px}
+.home-quick {display:flex;flex-wrap:wrap;gap:10px;margin:0 0 24px}
+.home-quick a {display:flex;align-items:center;gap:8px;padding:12px 16px;border:1px solid var(--line);border-radius:12px;text-decoration:none;font-size:13px;min-height:44px}
+.home-onboarding {display:flex;align-items:center;gap:24px;justify-content:space-between}
+.home-onboarding h2 {font-size:19px;margin:0 0 8px}.home-onboarding p {margin:0;max-width:630px;line-height:1.6;color:var(--muted)}
+.home-onboarding button {flex-shrink:0}
+.home-section {margin:32px 0}.home-section .section-heading {margin:0 0 16px;gap:12px}.home-section h2,.more-section h2 {font-size:24px;font-weight:500}
+.home-card-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.home-event {text-decoration:none;overflow-wrap:anywhere}.home-event>span {font-size:12px;color:var(--muted)}.home-event h3 {font-size:19px;margin:14px 0 10px}.home-event p {font-size:13px;line-height:1.5}
+.home-empty {display:flex;align-items:center;justify-content:space-between;gap:16px}.home-empty p {margin:0;line-height:1.6}.home-empty button {flex-shrink:0}
+.home-people {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.home-person {padding:0;overflow:hidden;text-decoration:none}.home-person img {display:block;width:100%;aspect-ratio:4/5;object-fit:cover}.home-person>div {padding:16px}.home-person h3 {font-size:18px;margin:0 0 8px}.home-person p {font-size:12px;line-height:1.6;margin:0;color:var(--muted)}
+.more-section {margin:28px 0}.more-links {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.more-link {display:flex;justify-content:space-between;align-items:center;gap:12px;text-decoration:none;min-height:72px}
+.home-create-options {display:grid;gap:12px;margin-top:24px}.home-create-options a {text-decoration:none}
+@media(hover:hover){.home-person:hover,.home-event:hover,.more-link:hover,.home-quick a:hover {background:var(--soft)}}
+@media(min-width:561px) and (max-width:800px){.nav-group-label {font-size:0;padding:8px}.home-lead {grid-template-columns:1fr}.home-visual {display:none}.home-people {grid-template-columns:repeat(2,minmax(0,1fr))}.more-links,.home-card-grid {grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){
+ body>aside>nav {grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+ body>aside>nav .nav-group-label,body>aside>nav .nav-item-calendar,body>aside>nav .nav-item-profile,body>aside>nav .nav-item-saved {display:none}
+ body>aside>nav .mobile-parent-active {background:var(--nav-active);font-weight:600}
+ .home-lead {grid-template-columns:1fr;padding:26px 22px;gap:0;margin:18px 0}.home-lead h1 {font-size:38px}.home-lead .eyebrow {font-size:9px;letter-spacing:.12em}.home-visual {display:none}.home-actions>* {flex:1 1 160px}
+ .home-onboarding,.home-empty {align-items:stretch;flex-direction:column;gap:16px}.home-quick {gap:8px}.home-quick a {flex:1 1 120px;font-size:12px;padding:10px}
+ .home-card-grid,.more-links {grid-template-columns:1fr}.home-people {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.home-person>div {padding:12px}.home-person h3 {font-size:16px}.home-section h2 {font-size:23px}.home-section .section-heading {align-items:flex-start}.home-section .section-heading a {font-size:13px}
+}
+
+body>aside>nav .nav-short {display:none}
+@media(max-width:560px){body>aside>nav .nav-long {display:none}body>aside>nav .nav-short {display:block}}
