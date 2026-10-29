@@ -17,3 +17,8 @@
   .form-actions>button,.shoot-form-actions>button,.shoot-detail-actions>button {flex:1 1 140px}
   .modal .form-actions>.primary {width:auto}
 }
+
+.calendar-date-jump {display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px 12px;margin:0 0 22px}
+.calendar-date-jump .form-label {margin:0;flex:0 1 240px;min-width:0}
+.calendar-date-jump small {flex-basis:100%;color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:560px){.calendar-date-jump .form-label {flex:1 1 180px}}

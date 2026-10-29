@@ -31,6 +31,7 @@ function renderCalendar() {
   }
   document.getElementById('content').innerHTML=pageIntro(tr('Календарь съёмок','Shoot calendar'),tr('Твои даты, места и детали встреч — в одном месте.','Your dates, locations and meeting details in one place.'),true)+`
     <div class="calendar-toolbar"><div class="calendar-month-nav"><button id="calendar-prev" aria-label="${tr('Предыдущий месяц','Previous month')}">←</button><h2>${esc(title)}</h2><button id="calendar-next" aria-label="${tr('Следующий месяц','Next month')}">→</button></div><div class="calendar-actions"><button id="calendar-today">${tr('Сегодня','Today')}</button><button id="calendar-add" class="primary">＋ ${tr('Добавить съёмку','Add shoot')}</button></div></div>
+    <form id="calendar-date-jump" class="calendar-date-jump"><label class="form-label" for="calendar-date-input">${tr('Перейти к дате','Go to date')}<input id="calendar-date-input" type="date" required min="1900-01-01" max="2100-12-31" value="${calendarDay}" aria-describedby="calendar-date-help"></label><button class="ui-secondary" type="submit">${tr('Перейти','Go')}</button><small id="calendar-date-help">${tr('Введи дату вручную, например 12.11.2026','Type a date, for example 12.11.2026')}</small></form>
     <div class="availability-legend">${['free','busy','tentative','confirmed'].map(s=>`<span><i class="availability-dot availability-${s}"></i>${availabilityLabel(s)}</span>`).join('')}</div><div class="calendar-layout"><section class="surface calendar-month" aria-label="${esc(title)}"><div class="calendar-week">${tr('Пн Вт Ср Чт Пт Сб Вс','Mon Tue Wed Thu Fri Sat Sun').split(' ').map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells}</div></section>
     <section class="surface calendar-agenda"><h2>${esc(new Date(calendarDay+'T12:00:00').toLocaleDateString(calendarLocale(),{day:'numeric',month:'long',year:'numeric'}))}</h2><p>${availabilityLabel(availability[calendarDay])}</p><div class="workflow-actions"><button id="calendar-availability">${tr('Изменить доступность','Edit availability')}</button><button id="availability-visibility">${tr('Видимость','Visibility')}</button></div>${daily.length?daily.map(item=>{
       const person=shootPerson(item.personId);
@@ -38,6 +39,15 @@ function renderCalendar() {
     }).join(''):`<div class="calendar-empty"><span aria-hidden="true">＋</span><p>${tr('На этот день съёмок пока нет.','No shoots planned for this day.')}</p><button id="calendar-empty-add">${tr('Запланировать съёмку','Plan a shoot')}</button></div>`}</section></div>
     <p class="demo-banner">${tr('Личный календарь на этом устройстве. Время указывай по месту съёмки. Запись не отправляет приглашение собеседнику.','Your personal calendar on this device. Use local time at the shoot location. Saving does not send an invitation.')}</p>`;
   const content=document.getElementById('content');
+  enhanceDateInputs(content);
+  document.getElementById('calendar-date-jump').onsubmit=event=>{
+    event.preventDefault();
+    const input=document.getElementById('calendar-date-input');
+    input.setCustomValidity(dateInputError(input));
+    if(!input.reportValidity())return;
+    calendarDay=parseFlexibleDate(input.value);calendarMonth=calendarDay.slice(0,7);
+    renderCalendar();document.getElementById('calendar-date-input').focus();
+  };
   bindShootCards(content);
   bindAvailability(content,renderCalendar);
   document.getElementById("calendar-availability").onclick=()=>openAvailabilityEditor(calendarDay,renderCalendar);
