@@ -426,7 +426,7 @@ const filtered = catalogPeople().filter(person => {
 
     const desiredRole = state.role;
     const searchable =
-      `${person.name} ${personUsername(person)} ${person.specialty || ""} ${person.city} ${person.tags.join(" ")} ${settings.language === "en" ? person.tags.map(englishText).join(" ") + " " + englishText(person.city) : ""}`.toLowerCase();
+      `${person.name} ${personUsername(person)} ${person.specialty || ""} ${person.city} ${person.tags.join(" ")} ${settings.language === "en" ? person.tags.map(englishText).join(" ") + " " + englishText(person.city) + " " + englishText(person.specialty || person.role) : ""}`.toLowerCase();
 
     return (
       !invalidAge && (isOrganization(person.role) ? !state.ageMin && !state.ageMax && !state.gender : person.age >= minAge && person.age <= maxAge) &&
@@ -1540,7 +1540,7 @@ window.addEventListener("hashchange", () => {
 
 // Перевод подписей существующих экранов; пользовательский текст не переводится.
 const interfaceEnglish = {
-"Агентство":"Agency","Команда":"Team","Бренд / компания":"Brand / company","Бьюти-мастер":"Beauty professional","Визажист":"Makeup artist","Парикмахер-стилист":"Hair stylist","Мастер по наращиванию волос":"Hair extension specialist","Мастер ногтевого сервиса":"Nail technician","Бровист":"Brow artist","Лэшмейкер":"Lash artist","Мастер по гриму":"Special effects makeup artist","Универсальный бьюти-мастер":"Multidisciplinary beauty professional",
+"Агентство":"Agency","Команда":"Team","Бренд / компания":"Brand / company","Бьюти-мастер":"Beauty professional","Визажист":"Makeup artist","Стилист":"Stylist","Парикмахер-стилист":"Hair stylist","Мастер по наращиванию волос":"Hair extension specialist","Мастер ногтевого сервиса":"Nail technician","Бровист":"Brow artist","Лэшмейкер":"Lash artist","Мастер по гриму":"Special effects makeup artist","Универсальный бьюти-мастер":"Multidisciplinary beauty professional",
 "Женский":"Female","Мужской":"Male","Не указан":"Not specified",
 "Город":"City","Город съёмки":"Shoot location","В каком городе ты снимаешь?":"Which city do you shoot in?","Творческое сообщество · 18+":"Creative community · 18+","Сообщество · 18+":"Community · 18+","Санкт-Петербург":"Saint Petersburg",
 "ВКадре — главная":"ВКадре — home","Главное меню":"Main navigation","⌖ Санкт-Петербург":"⌖ Saint Petersburg","ТВОЁ ПРОСТРАНСТВО":"YOUR SPACE","Сообщество /":"Community /","Твой следующий классный кадр — здесь":"Your next great shot starts here","Знакомься, вдохновляйся и создавай вместе.":"Connect, get inspired and create together.","◉ Хорошие кадры начинаются с хороших знакомств.":"◉ Great shots start with great connections.","Создавай вместе ↗":"Create together ↗",
